@@ -8,17 +8,27 @@ An API is a way to ask the provider for the model's response without having to d
 
 ## 1. Setup: Python in VSCode
 
-In a new window, click 'Open Folder' and open your python_files folder.
-If a pop up comes up, click 'Yes, I trust the Authors'.
-Press Ctrl+Shift+P and start typing 'Python: Create Environment' until the option appears.
-Click 'Venv'.
-Choose the latest version of Python you have installed.
-Wait until your environment is created. You'll see a folder called '.venv' appear.
-If you don't see the folders in the siderbar, press Ctrl+B to show/hide the folders list.
-When this process is finished, a pop up in the bottom-right corner will say 'The following environment is selected: d:\python_files\.venv\......'
-Press Ctrl+` to show the Terminal.
-Click the expand arrow next to the '+' and open a Command Prompt window.
-You should see your current file location with (.venv) before it. This confirms your virtual environment is set up and active.
+### Create a Virtual Environment
+
+1. In a new window, click 'Open Folder' and open your python_files folder. If a pop up comes up, click 'Yes, I trust the Authors'.
+
+2. Press Ctrl+Shift+P and start typing 'Python: Create Environment' until the option appears.
+
+3. Click 'Venv'.
+
+4. Choose the latest version of Python you have installed.
+5. Wait until your environment is created. You'll see a folder called '.venv' appear.
+
+6. If you don't see the folders in the siderbar, press Ctrl+B to show/hide the folders list.
+
+7. When this process is finished, a pop up in the bottom-right corner will say 'The following environment is selected: d:\python_files\.venv\......'
+
+8. Press Ctrl+` to show the Terminal.
+
+9. Click the expand arrow next to the '+' and open a Command Prompt window.
+10. You should see your current file location with (.venv) before it. This confirms your virtual environment is set up and active.
+
+### Install Requirements with pip
 
 Type `pip --version` and press Enter to make sure you have pip installed.
 You should get something like this:
