@@ -1,0 +1,281 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safari Animals Quiz Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+        }
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+        .start-btn {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .start-btn:hover {
+            background: #45b7aa;
+        }
+        .question {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #2d3436;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            background: #ffeaa7;
+            border: 2px solid #fab1a0;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        .option:hover {
+            background: #ffecd2;
+            transform: scale(1.05);
+        }
+        .option.correct {
+            background: #55efc4;
+            border-color: #00b894;
+        }
+        .option.incorrect {
+            background: #ff7675;
+            border-color: #e17055;
+        }
+        .next-btn {
+            background: #fdcb6e;
+            color: #333;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+            transition: background 0.3s;
+        }
+        .next-btn:hover {
+            background: #e17055;
+            color: white;
+        }
+        .score {
+            font-size: 20px;
+            margin-top: 20px;
+            color: #0984e3;
+        }
+        .feedback {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .fun-fact {
+            margin-top: 15px;
+            font-style: italic;
+            color: #636e72;
+        }
+        .game-over {
+            display: none;
+        }
+        .game-over h2 {
+            color: #6c5ce7;
+        }
+        .retry-btn {
+            background: #a29bfe;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .retry-btn:hover {
+            background: #8e44ad;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏞️ Safari Animals Quiz! 🦁</h1>
+        <div id="start-screen">
+            <p>Test your knowledge of amazing safari animals! Answer questions to earn points and learn fun facts.</p>
+            <button class="start-btn" onclick="startGame()">Start Quiz</button>
+        </div>
+        <div id="quiz-screen" style="display:none;">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <div class="fun-fact" id="fun-fact"></div>
+            <button class="next-btn" onclick="nextQuestion()">Next Question</button>
+        </div>
+        <div id="game-over" class="game-over">
+            <h2>Quiz Complete! 🎉</h2>
+            <p>Your final score: <span id="final-score"></span></p>
+            <p>Thanks for playing! You've learned about some incredible safari animals.</p>
+            <button class="retry-btn" onclick="retryGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the largest land animal found on safaris?",
+                options: ["Lion", "Elephant", "Giraffe", "Zebra"],
+                answer: 1,
+                fact: "Elephants can weigh up to 7 tons and live up to 70 years!"
+            },
+            {
+                question: "Which animal is known as the 'King of the Jungle' and has a mane?",
+                options: ["Tiger", "Lion", "Cheetah", "Leopard"],
+                answer: 1,
+                fact: "Lions live in prides and the males protect the group."
+            },
+            {
+                question: "What safari animal has a long neck and eats leaves from tall trees?",
+                options: ["Zebra", "Hippo", "Giraffe", "Rhino"],
+                answer: 2,
+                fact: "A giraffe's neck can be up to 6 feet long, but it has the same number of neck vertebrae as a human!"
+            },
+            {
+                question: "Which animal is striped and often travels in herds on the African plains?",
+                options: ["Elephant", "Zebra", "Buffalo", "Antelope"],
+                answer: 1,
+                fact: "No two zebras have the same stripe pattern – it's like their fingerprint!"
+            },
+            {
+                question: "What big cat is the fastest land animal, reaching speeds up to 70 mph?",
+                options: ["Leopard", "Cheetah", "Lion", "Jaguar"],
+                answer: 1,
+                fact: "Cheetahs can accelerate from 0 to 60 mph in just 3 seconds!"
+            },
+            {
+                question: "Which safari animal uses its trunk to grab food and spray water?",
+                options: ["Rhino", "Hippo", "Elephant", "Giraffe"],
+                answer: 2,
+                fact: "An elephant's trunk has over 40,000 muscles and can lift over 700 pounds!"
+            },
+            {
+                question: "What animal is known for its long tongue and ability to climb trees upside down?",
+                options: ["Monkey", "Sloth", "Giraffe", "Anteater"],
+                answer: 2,
+                fact: "Giraffes have tongues up to 18 inches long, which are bluish-black to protect from sunburn!"
+            },
+            {
+                question: "Which animal has a thick skin, lives in water, and is very aggressive?",
+                options: ["Crocodile", "Hippo", "Rhino", "Buffalo"],
+                answer: 1,
+                fact: "Hippos are responsible for more human deaths in Africa than any other large animal."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const questionData = questions[currentQuestionIndex];
+            document.getElementById('question').textContent = questionData.question;
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            questionData.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectAnswer(index, optionElement);
+                optionsContainer.appendChild(optionElement);
+            });
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('fun-fact').textContent = '';
+            document.querySelector('.next-btn').style.display = 'none';
+            selectedAnswer = null;
+        }
+
+        function selectAnswer(index, element) {
+            if (selectedAnswer !== null) return;
+            selectedAnswer = index;
+            const correctIndex = questions[currentQuestionIndex].answer;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.onclick = null; // Disable further clicks
+                if (i === correctIndex) {
+                    opt.classList.add('correct');
+                } else if (i === index) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            if (index === correctIndex) {
+                score++;
+                document.getElementById('score').textContent = score;
+                document.getElementById('feedback').textContent = '🎉 Correct! Well done!';
+            } else {
+                document.getElementById('feedback').textContent = '❌ Oops! Not quite right.';
+            }
+            document.getElementById('fun-fact').textContent = questions[currentQuestionIndex].fact;
+            document.querySelector('.next-btn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('game-over').style.display = 'block';
+            document.getElementById('final-score').textContent = score + ' / ' + questions.length;
+        }
+
+        function retryGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById('score').textContent = score;
+            document.getElementById('game-over').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+```

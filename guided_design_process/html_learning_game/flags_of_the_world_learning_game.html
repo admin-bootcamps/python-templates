@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Flags of the World — Fun Quiz & Flashcards</title>
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --accent1:#ff6b6b;
+    --accent2:#6be7b7;
+    --accent3:#6bb0ff;
+    --glass: rgba(255,255,255,0.04);
+    --muted: #9aa7b2;
+    --success: #2fe58a;
+    --danger: #ff6b6b;
+  }
+  *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#051224 0%, #061426 50%, #071827 100%);color:#e6f3f5}
+  .container{max-width:980px;margin:28px auto;padding:22px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;box-shadow:0 8px 30px rgba(2,6,23,0.7);border:1px solid rgba(255,255,255,0.03)}
+  header{display:flex;align-items:center;gap:18px}
+  .logo{
+    width:70px;height:70px;border-radius:12px;background:linear-gradient(135deg,var(--accent3),var(--accent2));display:flex;align-items:center;justify-content:center;color:#042033;font-weight:700;font-size:20px;box-shadow:0 6px 20px rgba(107,176,255,0.12), inset 0 -4px 12px rgba(0,0,0,0.15)
+  }
+  h1{margin:0;font-size:22px}
+  p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+  .controls{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+  .mode-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:var(--muted);cursor:pointer}
+  .mode-btn.active{background:linear-gradient(90deg, rgba(107,176,255,0.12), rgba(107,231,183,0.06));color:#eaffff;border:1px solid rgba(107,176,255,0.18)}
+  .scoreboard{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .stat{background:var(--glass);padding:8px 12px;border-radius:10px;font-size:13px;color:var(--muted);border:1px solid rgba(255,255,255,0.02)}
+  main{display:flex;gap:20px;margin-top:18px;flex-wrap:wrap}
+  .left, .right{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:12px}
+  .left{flex:1;min-width:320px;border:1px solid rgba(255,255,255,0.03)}
+  .right{width:320px;border:1px solid rgba(255,255,255,0.03)}
+  /* Flag card */
+  .flag-card{display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.02)}
+  .flag-wrap{width:100%;height:190px;border-radius:8px;background:#0b2530;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+  .flag-wrap img{max-width:100%;max-height:100%;transition:transform .35s ease;border-radius:4px}
+  .flag-wrap:hover img{transform:scale(1.03)}
+  .question{font-weight:600;color:#e9fbff}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .choice{padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03);cursor:pointer;color:#e6f3f5;transition:transform .12s ease, box-shadow .12s ease;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:600}
+  .choice:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(3,12,22,0.5)}
+  .choice.correct{background:linear-gradient(90deg, rgba(47,229,138,0.12), rgba(47,229,138,0.06));border:1px solid rgba(47,229,138,0.18);box-shadow:0 8px 26px rgba(47,229,138,0.06)}
+  .choice.wrong{background:linear-gradient(90deg, rgba(255,107,107,0.08), rgba(255,107,107,0.04));border:1px solid rgba(255,107,107,0.12);box-shadow:0 6px 18px rgba(255,107,107,0.04)}
+  .feedback{height:24px;margin-top:8px;font-size:14px}
+  .controls-row{display:flex;gap:10px;margin-top:12px;align-items:center}
+  .btn{padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+  .btn.primary{background:linear-gradient(90deg,var(--accent3),var(--accent2));color:#042033}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+  .progress{height:8px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
+  .progress > i{height:100%;display:block;background:linear-gradient(90deg,var(--accent3),var(--accent2));width:0%}
+  .right .panel{display:flex;flex-direction:column;gap:12px}
+  .small{font-size:13px;color:var(--muted)}
+  .streak{display:flex;gap:6px;align-items:center}
+  .streak .dot{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.04);display:inline-flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+  .result{padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03)}
+  /* Flashcard mode */
+  .flashcard{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;border-radius:10px}
+  .card-front{width:100%;height:170px;border-radius:8px;background-image:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+  .reveal{padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.03);color:var(--muted)}
+  footer{margin-top:16px;color:var(--muted);font-size:13px;text-align:center}
+  .tiny{font-size:12px;color:var(--muted)}
+  /* Responsive */
+  @media (max-width:860px){
+    main{flex-direction:column}
+    .right{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="container" role="application" aria-label="Flags of the world learning game">
+  <header>
+    <div class="logo">FLAGS</div>
+    <div>
+      <h1>Flags of the World — Interactive Quiz & Flashcards</h1>
+      <p class="lead">Practice identifying flags. Choose a mode (Quiz / Flashcards), challenge yourself, and track your progress.</p>
+      <div class="controls" aria-hidden="false">
+        <button id="modeQuiz" class="mode-btn active" title="Multiple-choice quiz">Quiz</button>
+        <button id="modeFlash" class="mode-btn" title="Flashcards mode">Flashcards</button>
+        <div class="scoreboard" aria-live="polite">
+          <div class="stat" id="scoreStat">Score: 0</div>
+          <div class="stat" id="progressStat">0 / 0</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="left" aria-labelledby="mainTitle">
+      <div id="quizArea">
+        <div class="flag-card" role="region" aria-label="Flag question">
+          <div class="flag-wrap" title="Click to enlarge">
+            <img id="flagImage" src="" alt="Country flag">
+          </div>
+          <div style="width:100%;">
+            <div class="question" id="questionText">Which country does this flag belong to?</div>
+            <div class="choices" id="choices"></div>
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+            <div class="controls-row">
+              <button id="nextBtn" class="btn primary" disabled>Next</button>
+              <button id="skipBtn" class="btn ghost">Skip</button>
+              <div style="margin-left:auto;width:38%;">
+                <div class="small">Progress</div>
+                <div class="progress" aria-hidden="false"><i id="progBar" style="width:0%"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="flashArea" style="display:none;">
+        <div class="flashcard">
+          <div class="card-front flag-wrap" id="flashFlagWrap" style="height:220px;">
+            <img id="flashImage" src="" alt="Flashcard flag" style="max-height:100%">
+          </div>
+          <div style="width:100%;display:flex;align-items:center;gap:10px;">
+            <div class="reveal" id="revealText">Tap 'Reveal' to show the country name</div>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <button id="revealBtn" class="btn primary">Reveal</button>
+              <button id="flashNext" class="btn ghost">Next</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;width:100%;justify-content:center;margin-top:6px;">
+            <button id="knewBtn" class="btn" style="background:linear-gradient(90deg,#9be78b,#56d36a);color:#01220d" title="I knew this">I knew it</button>
+            <button id="didntBtn" class="btn" style="background:linear-gradient(90deg,#ffb86b,#ff6b6b);color:#2a0404" title="I didn't know this">I didn't</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <aside class="right" aria-label="Game stats and controls">
+      <div class="panel">
+        <div class="result">
+          <div class="small">Scoreboard</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+            <div>
+              <div style="font-size:20px;font-weight:700" id="scoreDisplay">0</div>
+              <div class="tiny">Points</div>
+            </div>
+            <div>
+              <div style="font-size:20px;font-weight:700;color:var(--accent2)" id="correctDisplay">0</div>
+              <div class="tiny">Correct</div>
+            </div>
+            <div>
+              <div style="font-size:20px;font-weight:700;color:var(--danger)" id="wrongDisplay">0</div>
+              <div class="tiny">Incorrect</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="small">Streak</div>
+          <div class="streak" id="streakDots" aria-hidden="true"></div>
+          <div class="small">Mode settings</div>
+          <div style="display:flex;gap:8px;">
+            <button id="shuffleBtn" class="btn ghost">Shuffle Questions</button>
+            <button id="resetBtn" class="btn" style="background:linear-gradient(90deg,#ffb86b,#ff6b6b);color:#2a0404">Reset</button>
+          </div>
+        </div>
+
+        <div class="result">
+          <div class="small">Session summary</div>
+          <div style="margin-top:8px;font-size:13px;color:var(--muted)" id="sessionSummary">Answered: 0 · Skipped: 0</div>
+          <div style="margin-top:10px;display:flex;gap:8px;">
+            <button id="finishBtn" class="btn primary">Finish & Show Result</button>
+            <button id="shareBtn" class="btn ghost" title="Copy score text">Share</button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    Tip: Click the flag to enlarge. Use Quiz to choose the correct country, or Flashcards to study at your own pace.
+  </footer>
+</div>
+
+<script>
+  // Data provided by the user
+  const DATA = [
+    {"country": "Seychelles", "flag": "https://www.countryflags.com/wp-content/uploads/seychelles-flag-png-large.png"},
+    {"country": "Sierra Leone", "flag": "https://www.countryflags.com/wp-content/uploads/sierra-leone-flag-png-large.png"},
+    {"country": "Singapore", "flag": "https://www.countryflags.com/wp-content/uploads/singapore-flag-png-large.png"},
+    {"country": "Slovakia", "flag": "https://www.countryflags.com/wp-content/uploads/slovakia-flag-png-large.png"},
+    {"country": "Slovenia", "flag": "https://www.countryflags.com/wp-content/uploads/slovenia-flag-png-large.png"},
+    {"country": "Solomon Islands", "flag": "https://www.countryflags.com/wp-content/uploads/solomon-islands-flag-png-large.png"},
+    {"country": "Somalia", "flag": "https://www.countryflags.com/wp-content/uploads/somalia-flag-png-large.png"},
+    {"country": "South Africa", "flag": "https://www.countryflags.com/wp-content/uploads/south-africa-flag-png-large.png"},
+    {"country": "South Korea", "flag": "https://www.countryflags.com/wp-content/uploads/south-korea-flag-png-large.png"},
+    {"country": "South Sudan", "flag": "https://www.countryflags.com/wp-content/uploads/south-sudan-flag-png-large.png"},
+    {"country": "Spain", "flag": "https://www.countryflags.com/wp-content/uploads/spain-flag-png-large.png"},
+    {"country": "Sri Lanka", "flag": "https://www.countryflags.com/wp-content/uploads/sri-lanka-flag-png-large.png"},
+    {"country": "Sudan", "flag": "https://www.countryflags.com/wp-content/uploads/sudan-flag-png-large.png"},
+    {"country": "Suriname", "flag": "https://www.countryflags.com/wp-content/uploads/suriname-flag-png-large.png"},
+    {"country": "Sweden", "flag": "https://www.countryflags.com/wp-content/uploads/sweden-flag-png-large.png"},
+    {"country": "Switzerland", "flag": "https://www.countryflags.com/wp-content/uploads/switzerland-flag-png-large.png"},
+    {"country": "Syria", "flag": "https://www.countryflags.com/wp-content/uploads/syria-flag-png-large.png"},
+    {"country": "Tajikistan", "flag": "https://www.countryflags.com/wp-content/uploads/tajikistan-flag-png-large.png"},
+    {"country": "Tanzania", "flag": "https://www.countryflags.com/wp-content/uploads/tanzania-flag-png-large.png"},
+    {"country": "Thailand", "flag": "https://www.countryflags.com/wp-content/uploads/thailand-flag-png-large.png"},
+    {"country": "Timor-Leste", "flag": "https://www.countryflags.com/wp-content/uploads/timor-leste-flag-png-large.png"},
+    {"country": "Togo", "flag": "https://www.countryflags.com/wp-content/uploads/togo-flag-png-large.png"},
+    {"country": "Tonga", "flag": "https://www.countryflags.com/wp-content/uploads/tonga-flag-png-large.png"},
+    {"country": "Trinidad and Tobago", "flag": "https://www.countryflags.com/wp-content/uploads/trinidad-and-tobago-flag-png-large.png"},
+    {"country": "Tunisia", "flag": "https://www.countryflags.com/wp-content/uploads/tunisia-flag-png-large.png"},
+    {"country": "Turkey", "flag": "https://www.countryflags.com/wp-content/uploads/turkey-flag-png-large.png"},
+    {"country": "Turkmenistan", "flag": "https://www.countryflags.com/wp-content/uploads/turkmenistan-flag-png-large.png"}
+  ];
+
+  // Utility helpers
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function pickNRandomExcept(list, n, excludeIndex) {
+    const pool = list.map((v,i)=>i).filter(i=>i!==excludeIndex);
+    return shuffle(pool).slice(0,n).map(i=>list[i]);
+  }
+
+  // DOM
+  const modeQuizBtn = document.getElementById('modeQuiz');
+  const modeFlashBtn = document.getElementById('modeFlash');
+  const quizArea = document.getElementById('quizArea');
+  const flashArea = document.getElementById('flashArea');
+
+  // Quiz elements
+  const flagImage = document.getElementById('flagImage');
+  const questionText = document.getElementById('questionText');
+  const choicesWrap = document.getElementById('choices');
+  const feedback = document.getElementById('feedback');
+  const nextBtn = document.getElementById('nextBtn');
+  const skipBtn = document.getElementById('skipBtn');
+  const progBar = document.getElementById('progBar');
+
+  // Flashcard elements
+  const flashImage = document.getElementById('flashImage');
+  const revealBtn = document.getElementById('revealBtn');
+  const revealText = document.getElementById('revealText');
+  const flashNext = document.getElementById('flashNext');
+  const knewBtn = document.getElementById('knewBtn');
+  const didntBtn = document.getElementById('didntBtn');
+
+  // Right panel
+  const scoreDisplay = document.getElementById('scoreDisplay');
+  const correctDisplay = document.getElementById('correctDisplay');
+  const wrongDisplay = document.getElementById('wrongDisplay');
+  const scoreStat = document.getElementById('scoreStat');
+  const progressStat = document.getElementById('progressStat');
+  const streakDots = document.getElementById('streakDots');
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const sessionSummary = document.getElementById('sessionSummary');
+  const finishBtn = document.getElementById('finishBtn');
+  const shareBtn = document.getElementById('shareBtn');
+  const progStatText = document.getElementById('progressStat');
+
+  // Internal state
+  let questions = DATA.slice(); // array of objects {country, flag}
+  let qOrder = []; // indices after shuffle
+  let currentIndex = 0; // index in qOrder
+  let score = 0;
+  let correct = 0;
+  let wrong = 0;
+  let answered = 0;
+  let skipped = 0;
+  let streak = 0;
+  let bestStreak = 0;
+  let lastAnswerCorrect = null;
+
+  // Flashcard state
+  let flashOrder = [];
+  let flashPos = 0;
+  let flashRevealed = false;
+  let flashKnew = 0;
+  let flashDidnt = 0;
+
+  // Initialization
+  function initSession(shuffleQuestions = true) {
+    questions = DATA.slice();
+    qOrder = questions.map((_,i)=>i);
+    if (shuffleQuestions) qOrder = shuffle(qOrder);
+    currentIndex = 0;
+    score = 0; correct = 0; wrong = 0; answered = 0; skipped = 0; streak = 0; bestStreak = 0; lastAnswerCorrect = null;
+    updateStats();
+    renderQuestion();
+    progBar.style.width = '0%';
+    nextBtn.disabled = true;
+    sessionSummary.textContent = `Answered: ${answered} · Skipped: ${skipped}`;
+    progressStat.textContent = `${currentIndex+1} / ${qOrder.length}`;
+    progressStat.setAttribute('aria-label', `Question ${currentIndex+1} of ${qOrder.length}`);
+    renderStreak();
+  }
+
+  // Quiz rendering
+  function renderQuestion() {
+    clearFeedback();
+    const qIdx = qOrder[currentIndex];
+    const qItem = questions[qIdx];
+    flagImage.src = qItem.flag;
+    flagImage.alt = `Flag of ${qItem.country}`;
+    // Build choices
+    const correctCountry = qItem.country;
+    // pick 3 random other countries
+    const others = pickNRandomExcept(questions, 3, qIdx).map(x=>x.country);
+    const options = shuffle([correctCountry, ...others]);
+    choicesWrap.innerHTML = '';
+    options.forEach(opt=>{
+      const btn = document.createElement('button');
+      btn.className = 'choice';
+      btn.setAttribute('type','button');
+      btn.textContent = opt;
+      btn.onclick = ()=>selectChoice(btn, opt, correctCountry);
+      choicesWrap.appendChild(btn);
+    });
+    // update question text & progress
+    questionText.textContent = `Which country does this flag belong to?`;
+    progressStat.textContent = `${currentIndex+1} / ${qOrder.length}`;
+    progBar.style.width = `${Math.round((currentIndex / qOrder.length) * 100)}%`;
+    nextBtn.disabled = true;
+  }
+
+  function selectChoice(btn, selected, correctCountry) {
+    // disable choices
+    const all = Array.from(choicesWrap.children);
+    all.forEach(b=>b.style.pointerEvents = 'none');
+    // evaluate
+    if (selected === correctCountry) {
+      btn.classList.add('correct');
+      feedback.textContent = 'Correct! +10 points';
+      feedback.style.color = 'var(--accent2)';
+      score += 10;
+      correct += 1;
+      answered += 1;
+      streak += 1;
+      if (streak > bestStreak) bestStreak = streak;
+      lastAnswerCorrect = true;
+    } else {
+      btn.classList.add('wrong');
+      // highlight the correct one
+      const correctBtn = all.find(b => b.textContent === correctCountry);
+      if (correctBtn) correctBtn.classList.add('correct');
+      feedback.textContent = `Incorrect. The correct answer is ${correctCountry}.`;
+      feedback.style.color = 'var(--danger)';
+      score = Math.max(0, score - 2);
+      wrong += 1;
+      answered += 1;
+      streak = 0;
+      lastAnswerCorrect = false;
+    }
+    updateStats();
+    sessionSummary.textContent = `Answered: ${answered} · Skipped: ${skipped}`;
+    renderStreak();
+    // allow next
+    nextBtn.disabled = false;
+    // pre-warm next question image
+    prewarmNext();
+  }
+
+  function prewarmNext() {
+    const nextIdx = currentIndex + 1;
+    if (nextIdx < qOrder.length) {
+      const img = new Image();
+      img.src = questions[qOrder[nextIdx]].flag;
+    }
+  }
+
+  nextBtn.addEventListener('click', ()=> {
+    currentIndex++;
+    if (currentIndex >= qOrder.length) {
+      finishSession();
+      return;
+    }
+    renderQuestion();
+  });
+
+  skipBtn.addEventListener('click', ()=> {
+    skipped++;
+    sessionSummary.textContent = `Answered: ${answered} · Skipped: ${skipped}`;
+    currentIndex++;
+    if (currentIndex >= qOrder.length) {
+      finishSession();
+      return;
+    }
+    renderQuestion();
+  });
+
+  // Flashcards
+  function initFlashcards(shuffleCards = true) {
+    flashOrder = questions.map((_,i)=>i);
+    if (shuffleCards) flashOrder = shuffle(flashOrder);
+    flashPos = 0; flashRevealed=false; flashKnew=0; flashDidnt=0;
+    renderFlash();
+  }
+  function renderFlash() {
+    const idx = flashOrder[flashPos];
+    const item = questions[idx];
+    flashImage.src = item.flag;
+    flashImage.alt = `Flag for flashcard: ${item.country}`;
+    revealText.textContent = 'Tap "Reveal" to show the country name';
+    revealText.style.color = 'var(--muted)';
+    flashRevealed = false;
+  }
+  revealBtn.addEventListener('click', ()=>{
+    const idx = flashOrder[flashPos];
+    revealText.textContent = questions[idx].country;
+    revealText.style.color = '#e9fbff';
+    flashRevealed = true;
+  });
+  flashNext.addEventListener('click', ()=>{
+    flashPos = (flashPos + 1) % flashOrder.length;
+    renderFlash();
+  });
+  knewBtn.addEventListener('click', ()=>{
+    flashKnew++; flashPos = (flashPos + 1) % flashOrder.length; renderFlash(); updateFlashStats();
+  });
+  didntBtn.addEventListener('click', ()=>{
+    flashDidnt++; flashPos = (flashPos + 1) % flashOrder.length; renderFlash(); updateFlashStats();
+  });
+  function updateFlashStats() {
+    sessionSummary.textContent = `Flashcards — Knew: ${flashKnew} · Didn't: ${flashDidnt}`;
+  }
+
+  // Mode switching
+  modeQuizBtn.addEventListener('click', ()=>{ setMode('quiz');});
+  modeFlashBtn.addEventListener('click', ()=>{ setMode('flash');});
+  function setMode(m) {
+    if (m === 'quiz') {
+      modeQuizBtn.classList.add('active');
+      modeFlashBtn.classList.remove('active');
+      quizArea.style.display = '';
+      flashArea.style.display = 'none';
+      initSession(false); // keep same order if already in session
+    } else {
+      modeFlashBtn.classList.add('active');
+      modeQuizBtn.classList.remove('active');
+      quizArea.style.display = 'none';
+      flashArea.style.display = '';
+      initFlashcards(false);
+    }
+  }
+
+  // Stats
+  function updateStats() {
+    scoreDisplay.textContent = score;
+    correctDisplay.textContent = correct;
+    wrongDisplay.textContent = wrong;
+    scoreStat.textContent = `Score: ${score}`;
+    progressStat.textContent = `${Math.min(currentIndex+1, qOrder.length)} / ${qOrder.length}`;
+  }
+
+  function renderStreak() {
+    streakDots.innerHTML = '';
+    const len = Math.min(bestStreak, 7);
+    for (let i=0;i<len;i++){
+      const d = document.createElement('div');
+      d.className = 'dot';
+      d.textContent = '★';
+      d.style.background = i < streak ? 'linear-gradient(90deg,var(--accent3),var(--accent2))' : 'rgba(255,255,255,0.03)';
+      streakDots.appendChild(d);
+    }
+    if (bestStreak === 0) streakDots.textContent = 'No streak yet';
+  }
+
+  // Reset & Shuffle
+  shuffleBtn.addEventListener('click', ()=>{
+    qOrder = shuffle(qOrder);
+    currentIndex = 0;
+    renderQuestion();
+  });
+  resetBtn.addEventListener('click', ()=>{
+    if (!confirm('Reset your session progress?')) return;
+    initSession(true);
+    initFlashcards(true);
+  });
+
+  // Finish & Share
+  function finishSession() {
+    // show a simple modal-like alert (in-page)
+    const pct = questions.length ? Math.round((correct / questions.length) * 100) : 0;
+    const message = `Session finished!\nPoints: ${score}\nCorrect: ${correct}\nIncorrect: ${wrong}\nSkipped: ${skipped}\nAccuracy: ${pct}%\nBest streak: ${bestStreak}`;
+    alert(message);
+    // reset for a new round
+    initSession(true);
+  }
+  finishBtn.addEventListener('click', finishSession);
+
+  shareBtn.addEventListener('click', ()=>{
+    const text = `I scored ${score} points on Flags of the World! (${correct} correct, ${wrong} wrong)`;
+    navigator.clipboard?.writeText(text).then(()=> {
+      alert('Score copied to clipboard: ' + text);
+    }).catch(()=> {
+      prompt('Copy your score:', text);
+    });
+  });
+
+  // Small UX: click flag to open in new tab larger
+  document.querySelectorAll('.flag-wrap').forEach(wrap=>{
+    wrap.addEventListener('click', (e)=>{
+      const img = wrap.querySelector('img');
+      if (img && img.src) {
+        window.open(img.src, '_blank');
+      }
+    });
+  });
+
+  // Clear feedback
+  function clearFeedback(){
+    feedback.textContent = '';
+  }
+
+  // Init on load
+  initSession(true);
+  initFlashcards(true);
+
+  // Keyboard shortcuts (1-4 for choices, N for next, S to skip)
+  document.addEventListener('keydown', (e)=>{
+    if (quizArea.style.display !== 'none') {
+      if (/^[1-4]$/.test(e.key)) {
+        const idx = parseInt(e.key,10)-1;
+        const children = Array.from(choicesWrap.children);
+        if (children[idx]) children[idx].click();
+      } else if (e.key.toLowerCase() === 'n') nextBtn.click();
+      else if (e.key.toLowerCase() === 's') skipBtn.click();
+    } else {
+      if (e.key.toLowerCase() === 'r') revealBtn.click();
+      if (e.key.toLowerCase() === 'n') flashNext.click();
+    }
+  });
+
+  // Accessibility: announce when image fails to load
+  flagImage.addEventListener('error', ()=>{ flagImage.alt = 'Flag image could not load.'; });
+  flashImage.addEventListener('error', ()=>{ flashImage.alt = 'Flag image could not load.'; });
+
+  // Small initial animation for progress
+  setTimeout(()=>{ progBar.style.transition = 'width 600ms ease'; }, 250);
+</script>
+</body>
+</html>

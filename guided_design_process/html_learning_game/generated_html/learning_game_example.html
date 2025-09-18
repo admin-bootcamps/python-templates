@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Digest Dash! A Human Digestion Learning Game</title>
+<style>
+  :root{
+    --bg1:#0f1020;
+    --bg2:#121a38;
+    --card:#1a1f3f;
+    --card2:#16223a;
+    --text:#ecf2ff;
+    --muted:#a9b4d0;
+    --accent:#6ef3a5;
+    --accent2:#70c2ff;
+    --accent3:#ffb86b;
+    --wrong:#ff6b7a;
+    --right:#35e177;
+    --gold:#ffd166;
+    --purple:#a78bfa;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+    color:var(--text);
+    background: radial-gradient(1200px 600px at 20% -10%, #172048 0%, transparent 60%),
+                radial-gradient(1000px 600px at 120% 0%, #112238 0%, transparent 70%),
+                linear-gradient(160deg, var(--bg1), var(--bg2));
+    min-height:100vh;
+  }
+  header{
+    padding:24px 20px 10px;
+    text-align:center;
+  }
+  h1{
+    margin:0;
+    font-weight:900;
+    letter-spacing:0.5px;
+    font-size: clamp(1.6rem, 1.1rem + 2vw, 2.6rem);
+    background: linear-gradient(92deg, var(--accent), var(--accent2), var(--accent3));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-shadow: 0 0 18px rgba(110,243,165,0.15);
+  }
+  .subtitle{
+    color:var(--muted);
+    margin-top:6px;
+  }
+  .hud{
+    display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;
+    margin:16px auto 8px;
+  }
+  .pill{
+    background: linear-gradient(180deg, #1b2344, #131a34);
+    border:1px solid #26305c;
+    padding:8px 14px; border-radius:999px; color:var(--muted);
+    display:flex; align-items:center; gap:8px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+  }
+  .pill strong{color:var(--text)}
+  .progress{
+    width:min(800px, 92%); margin: 0 auto 16px; background:#0c1430; border:1px solid #182554; border-radius:999px; height:14px; overflow:hidden;
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.3);
+  }
+  .bar{height:100%; width:0%; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); transition: width 500ms ease;}
+  main{
+    max-width: 980px; margin: 10px auto 80px; padding: 0 18px;
+  }
+  .stage{
+    background: linear-gradient(180deg, var(--card), var(--card2));
+    border:1px solid #253465;
+    border-radius:18px;
+    padding:18px;
+    margin:16px 0;
+    box-shadow: 0 8px 26px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+  .stage.locked{opacity:0.35; filter:grayscale(0.3); pointer-events:none}
+  .stage-header{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .stage-title{
+    font-weight:800; font-size:1.15rem; letter-spacing:0.3px;
+  }
+  .tag{
+    padding:6px 10px; border-radius:8px; background:#0e1b36; border:1px solid #253465; color:var(--muted); font-size:0.9rem;
+  }
+  .question-card{
+    background: #0e1c3a; border:1px solid #2a3a70; border-radius:16px; padding:18px; margin:14px 0;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  }
+  .q-text{font-weight:700; line-height:1.35}
+  .options{display:grid; gap:10px; margin-top:12px}
+  .opt{
+    border:1px solid #2a3a70; background: linear-gradient(180deg, #16244b, #0e1a35);
+    border-radius:12px; padding:12px 14px;
+    display:flex; gap:12px; align-items:center; cursor:pointer; position:relative; overflow:hidden;
+    transition: transform .08s ease, border-color .2s;
+  }
+  .opt:hover{transform: translateY(-1px); border-color:#3853a8}
+  .opt.selected{outline:2px solid #4d67d6}
+  .opt.correct{border-color: #1fe088; background: linear-gradient(180deg, #173c2b, #0f2f25); box-shadow: 0 0 0 1px rgba(31,224,136,0.3) inset}
+  .opt.wrong{border-color: #ff6b7a; background: linear-gradient(180deg, #3a1620, #2a0f14); box-shadow: 0 0 0 1px rgba(255,107,122,0.25) inset}
+  .btn{
+    background: linear-gradient(180deg, #4c7cff, #436ee6);
+    border:1px solid #6c8fff; color:white; font-weight:700; letter-spacing:0.3px;
+    padding:10px 14px; border-radius:12px; cursor:pointer; transition: transform 0.05s ease, filter .2s; box-shadow: 0 6px 18px rgba(76,124,255,0.25);
+  }
+  .btn:hover{filter:brightness(1.1)}
+  .btn:active{transform: translateY(1px)}
+  .btn.secondary{background: linear-gradient(180deg, #1b2a59, #11224d); border-color:#2e4aa3}
+  .btn.success{background: linear-gradient(180deg, #28c76f, #1ba95c); border-color:#35e177}
+  .btn.warn{background: linear-gradient(180deg, #ff8c6b, #ff6b6b); border-color:#ff8a8a}
+  .explain{
+    margin-top:10px; color:#b8c4ea; font-size:0.95rem
+  }
+  .tf-row{display:grid; gap:14px}
+  .tf-card{
+    display:flex; flex-direction:column; gap:10px; padding:14px; border-radius:14px; background:#0f1e3f; border:1px solid #2a3a70;
+  }
+  .tf-actions{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{
+    font-weight:800; font-size:0.8rem; padding:4px 8px; border-radius:999px; border:1px solid #32488e;
+    background:#0c1430; color:#9fb2f6; display:inline-flex; align-items:center; gap:6px;
+  }
+  .result{
+    margin-top:8px; font-weight:700;
+  }
+  .result.good{color:var(--right)} .result.bad{color:var(--wrong)}
+  .grid-2{display:grid; grid-template-columns: repeat(2, 1fr); gap:14px}
+  @media (max-width:800px){.grid-2{grid-template-columns: 1fr}}
+  textarea, input[type="text"]{
+    width:100%; background:#0a1533; border:1px solid #2a3a70; border-radius:12px; padding:12px; color:var(--text);
+    resize:vertical; min-height:84px; outline:none; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+  }
+  .note{
+    color:#a1b0e3; font-size:0.92rem; margin:6px 0 0;
+  }
+  .foot-actions{
+    display:flex; gap:10px; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-top:12px
+  }
+  .score-pop{
+    position:fixed; top:16px; right:16px; background:#09122a; border:1px solid #253465; color:#d8e2ff; padding:10px 12px; border-radius:12px; box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    opacity:0; transform: translateY(-10px); pointer-events:none; transition: all .25s ease;
+  }
+  .score-pop.show{opacity:1; transform: translateY(0)}
+  .final{
+    text-align:center; padding:18px; border-radius:16px; border:1px solid #2a3a70; background:#0c1836; margin-top:16px;
+  }
+  .final h2{margin:6px 0 6px}
+  .star{
+    color:var(--gold); text-shadow:0 0 16px rgba(255,209,102,0.3); font-size:1.25rem; margin:0 2px;
+  }
+  .confetti{position:fixed; left:0; top:0; width:100%; height:0; pointer-events:none; overflow:visible}
+  .tiny{font-size:0.82rem; color:#98a8db}
+  .kbd{
+    background:#111c3b; border:1px solid #2b3d75; padding:2px 6px; border-radius:6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color:#cdd7fd
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Digest Dash! Human Digestion Quest</h1>
+  <div class="subtitle">Answer questions, rack up points, and master how your body turns food into fuel.</div>
+  <div class="hud">
+    <div class="pill">Score: <strong id="score">0</strong>/100</div>
+    <div class="pill">Streak: <strong id="streak">0</strong></div>
+    <div class="pill">Best: <strong id="best">0</strong></div>
+  </div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+</header>
+
+<main>
+  <section id="stage1" class="stage">
+    <div class="stage-header">
+      <div class="stage-title">Stage 1 • Multiple Choice</div>
+      <div class="tag">10 pts each • Choose the best answer</div>
+    </div>
+    <div id="mc-container" class="question-card">
+      <div class="q-text" id="mc-q"></div>
+      <div class="options" id="mc-options"></div>
+      <div class="foot-actions">
+        <div id="mc-explain" class="explain"></div>
+        <div style="display:flex; gap:8px">
+          <button id="mc-skip" class="btn secondary">Skip</button>
+          <button id="mc-next" class="btn" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stage2" class="stage locked">
+    <div class="stage-header">
+      <div class="stage-title">Stage 2 • True/False Blitz</div>
+      <div class="tag">5 pts each • Instant feedback</div>
+    </div>
+    <div id="tf-container" class="tf-row">
+      <!-- True/False cards generated here -->
+    </div>
+    <div class="foot-actions">
+      <div class="note">Tip: Use T and F keys to answer the focused card quickly.</div>
+      <button id="tf-submit" class="btn" disabled>Continue</button>
+    </div>
+  </section>
+
+  <section id="stage3" class="stage locked">
+    <div class="stage-header">
+      <div class="stage-title">Stage 3 • Short Answer Showdown</div>
+      <div class="tag">Up to 20 pts each • Partial credit possible</div>
+    </div>
+    <div class="grid-2">
+      <div class="question-card">
+        <div class="q-text">Name the three main types of macronutrients that are digested in the human body.</div>
+        <textarea id="sa1" placeholder="Type your answer... e.g., carbohydrates, proteins, and fats"></textarea>
+        <div id="sa1-feedback" class="explain"></div>
+      </div>
+      <div class="question-card">
+        <div class="q-text">Explain the role of the pancreas in digestion.</div>
+        <textarea id="sa2" placeholder="Type your answer..."></textarea>
+        <div id="sa2-feedback" class="explain"></div>
+      </div>
+    </div>
+    <div class="foot-actions">
+      <div class="note">Write your best answer. Keywords matter!</div>
+      <div style="display:flex; gap:8px">
+        <button id="sa-hint" class="btn secondary">Hint</button>
+        <button id="sa-check" class="btn">Check Answers</button>
+      </div>
+    </div>
+    <div id="final" class="final" hidden>
+      <h2>Your Digest Dash Results</h2>
+      <div id="final-msg" style="margin:8px 0 10px"></div>
+      <div id="final-stars" style="font-size:1.2rem"></div>
+      <div style="margin-top:12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+        <button id="play-again" class="btn success">Play Again</button>
+        <button id="reset" class="btn warn">Reset All</button>
+      </div>
+      <div style="margin-top:10px" class="tiny">Pro tip: Press <span class="kbd">R</span> to retry the current stage.</div>
+    </div>
+  </section>
+</main>
+
+<div class="score-pop" id="score-pop">+10 pts!</div>
+<svg class="confetti" id="confetti"></svg>
+
+<script>
+(function(){
+  // Data
+  const mcQuestions = [
+    {
+      q: "Which of the following is the main function of the stomach?",
+      options: ["Absorb nutrients","Produce insulin","Break down food with acid and enzymes","Filter toxins from blood"],
+      answer: 2,
+      explain: "The stomach churns and uses acid (HCl) and enzymes to begin protein digestion and break food into chyme."
+    },
+    {
+      q: "Where does most nutrient absorption occur?",
+      options: ["Stomach","Large intestine","Small intestine","Esophagus"],
+      answer: 2,
+      explain: "The small intestine (especially the jejunum) is specialized for nutrient absorption with villi and microvilli."
+    },
+    {
+      q: "Which enzyme breaks down starch into sugar?",
+      options: ["Lipase","Amylase","Protease","Lactase"],
+      answer: 1,
+      explain: "Amylase breaks complex carbohydrates (starch) into simpler sugars."
+    },
+    {
+      q: "The liver produces:",
+      options: ["Bile","Gastric juice","Saliva","Insulin"],
+      answer: 0,
+      explain: "The liver makes bile, which helps emulsify fats. (Insulin is produced by the pancreas.)"
+    }
+  ];
+
+  const tfQuestions = [
+    {
+      q: "The esophagus uses muscle contractions called peristalsis to move food to the stomach.",
+      answer: true,
+      explain: "True — peristalsis propels the bolus toward the stomach."
+    },
+    {
+      q: "The large intestine absorbs most of the nutrients from food.",
+      answer: false,
+      explain: "False — most nutrients are absorbed in the small intestine; the large intestine absorbs water and some electrolytes."
+    },
+    {
+      q: "Proteins are broken down into amino acids during digestion.",
+      answer: true,
+      explain: "True — proteins are digested into their building blocks: amino acids."
+    },
+    {
+      q: "Bile helps in the digestion of fats.",
+      answer: true,
+      explain: "True — bile emulsifies fats, making them easier for lipase to digest."
+    }
+  ];
+
+  // Game state
+  let score = 0;
+  let best = parseInt(localStorage.getItem("digest-best")||"0",10);
+  let streak = 0;
+  let totalMax = 100;
+  let progress = 0; // 0..100
+  let mcIndex = 0;
+  let mcAnswered = false;
+  let tfAnsweredCount = 0;
+  const tfState = new Array(tfQuestions.length).fill(null);
+  let stage1Complete = false;
+  let stage2Complete = false;
+  let stage3Complete = false;
+  const points = {
+    mc: 10,
+    tf: 5,
+    sa1: 20,
+    sa2: 20
+  };
+
+  // DOM refs
+  const scoreEl = document.getElementById("score");
+  const bestEl = document.getElementById("best");
+  const streakEl = document.getElementById("streak");
+  const barEl = document.getElementById("bar");
+  const popEl = document.getElementById("score-pop");
+  const stage1El = document.getElementById("stage1");
+  const stage2El = document.getElementById("stage2");
+  const stage3El = document.getElementById("stage3");
+  const mcQEl = document.getElementById("mc-q");
+  const mcOptsEl = document.getElementById("mc-options");
+  const mcExplainEl = document.getElementById("mc-explain");
+  const mcNextBtn = document.getElementById("mc-next");
+  const mcSkipBtn = document.getElementById("mc-skip");
+  const tfContainer = document.getElementById("tf-container");
+  const tfSubmitBtn = document.getElementById("tf-submit");
+  const sa1El = document.getElementById("sa1");
+  const sa2El = document.getElementById("sa2");
+  const sa1Fb = document.getElementById("sa1-feedback");
+  const sa2Fb = document.getElementById("sa2-feedback");
+  const saHintBtn = document.getElementById("sa-hint");
+  const saCheckBtn = document.getElementById("sa-check");
+  const finalEl = document.getElementById("final");
+  const finalMsg = document.getElementById("final-msg");
+  const finalStars = document.getElementById("final-stars");
+  const playAgainBtn = document.getElementById("play-again");
+  const resetBtn = document.getElementById("reset");
+  const confettiSVG = document.getElementById("confetti");
+
+  bestEl.textContent = best;
+
+  function formatPop(pts){ 
+    popEl.textContent = (pts>=0?"+":"") + pts + " pts!";
+    popEl.classList.add("show");
+    setTimeout(()=>popEl.classList.remove("show"), 1200);
+  }
+  function updateHUD(){
+    scoreEl.textContent = score;
+    streakEl.textContent = streak;
+    const pct = Math.round((score/totalMax)*100);
+    barEl.style.width = pct + "%";
+  }
+  function setLocked(stageEl, locked){
+    if(locked) stageEl.classList.add("locked");
+    else stageEl.classList.remove("locked");
+  }
+  function bumpStreak(isCorrect){
+    if(isCorrect){ streak++; }
+    else { streak = 0; }
+    streakEl.textContent = streak;
+  }
+  function addScore(pts){
+    score += pts;
+    if(score<0) score=0;
+    if(score>totalMax) score=totalMax;
+    updateHUD();
+    formatPop(pts);
+  }
+
+  // Confetti celebration
+  function celebrate(){
+    createConfetti();
+    pulseTitle();
+  }
+  function pulseTitle(){
+    const h1 = document.querySelector("h1");
+    h1.style.transition = "transform 600ms ease";
+    h1.style.transform = "scale(1.05)";
+    setTimeout(()=>{ h1.style.transform="scale(1)"; }, 650);
+  }
+  function createConfetti(){
+    const colors = [ "#6ef3a5", "#70c2ff", "#ffb86b", "#ffd166", "#a78bfa", "#ff6b7a" ];
+    const count = 140;
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    confettiSVG.innerHTML = "";
+    for(let i=0;i<count;i++){
+      const rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+      const x = Math.random()*W;
+      const s = 6+Math.random()*10;
+      rect.setAttribute("x", x);
+      rect.setAttribute("y", -20-Math.random()*H*0.5);
+      rect.setAttribute("width", s);
+      rect.setAttribute("height", 3+Math.random()*6);
+      rect.setAttribute("fill", colors[Math.floor(Math.random()*colors.length)]);
+      rect.style.opacity = 0.9;
+      confettiSVG.appendChild(rect);
+      // animate
+      const dur = 3000+Math.random()*1500;
+      const rot = (Math.random()<0.5? -1:1)*(200+Math.random()*400);
+      rect.animate([
+        { transform: `translateY(0px) rotate(0deg)`, opacity: 1 },
+        { transform: `translateY(${H+60}px) rotate(${rot}deg)`, opacity: 0.8 }
+      ], { duration: dur, easing: "cubic-bezier(.2,.6,.2,1)", fill: "forwards" });
+    }
+    setTimeout(()=>{ confettiSVG.innerHTML=""; }, 5000);
+  }
+
+  // Stage 1: Multiple Choice
+  function renderMC(){
+    const item = mcQuestions[mcIndex];
+    mcQEl.textContent = item.q;
+    mcOptsEl.innerHTML = "";
+    mcExplainEl.textContent = "";
+    mcNextBtn.disabled = true;
+    mcSkipBtn.disabled = false;
+    mcAnswered = false;
+
+    item.options.forEach((optText, i)=>{
+      const div = document.createElement("button");
+      div.type = "button";
+      div.className = "opt";
+      div.setAttribute("data-index", i);
+      div.innerHTML = `<span class="chip">${String.fromCharCode(97+i)})</span> <span>${optText}</span>`;
+      div.addEventListener("click", ()=> handleMCSelect(i, div));
+      mcOptsEl.appendChild(div);
+    });
+  }
+
+  function handleMCSelect(i, btn){
+    if(mcAnswered) return;
+    const item = mcQuestions[mcIndex];
+    mcAnswered = true;
+    const options = mcOptsEl.querySelectorAll(".opt");
+    options.forEach(o=>o.disabled=true);
+
+    if(i === item.answer){
+      btn.classList.add("correct");
+      mcExplainEl.innerHTML = "Correct! " + item.explain;
+      addScore(points.mc);
+      bumpStreak(true);
+    }else{
+      btn.classList.add("wrong");
+      options[item.answer].classList.add("correct");
+      mcExplainEl.innerHTML = "Not quite. " + item.explain;
+      bumpStreak(false);
+    }
+    mcNextBtn.disabled = false;
+    mcSkipBtn.disabled = true;
+  }
+
+  mcNextBtn.addEventListener("click", ()=>{
+    mcIndex++;
+    if(mcIndex < mcQuestions.length){
+      renderMC();
+    } else {
+      stage1Complete = true;
+      setLocked(stage2El, false);
+      celebrate();
+      // Light instruction
+      mcQEl.textContent = "Stage complete! Head to Stage 2 below.";
+      mcOptsEl.innerHTML = "";
+      mcExplainEl.textContent = "";
+      mcNextBtn.disabled = true;
+    }
+  });
+  mcSkipBtn.addEventListener("click", ()=>{
+    if(mcAnswered) return;
+    // Allow skip without penalty, but reset streak
+    bumpStreak(false);
+    mcNextBtn.click();
+  });
+
+  // Stage 2: True/False
+  function renderTF(){
+    tfContainer.innerHTML = "";
+    tfAnsweredCount = 0;
+    for(let i=0;i<tfQuestions.length;i++){
+      const card = document.createElement("div");
+      card.className = "tf-card";
+      card.tabIndex = 0;
+      card.dataset.index = i;
+      const head = document.createElement("div");
+      head.innerHTML = `<div class="q-text">${tfQuestions[i].q} <span class="chip">T/F</span></div>`;
+      const actions = document.createElement("div");
+      actions.className = "tf-actions";
+      const btnT = document.createElement("button");
+      btnT.className = "btn secondary";
+      btnT.textContent = "True";
+      const btnF = document.createElement("button");
+      btnF.className = "btn secondary";
+      btnF.textContent = "False";
+      const result = document.createElement("div");
+      result.className = "result";
+
+      btnT.addEventListener("click", ()=>handleTF(i, true, card, result, btnT, btnF));
+      btnF.addEventListener("click", ()=>handleTF(i, false, card, result, btnT, btnF));
+
+      actions.appendChild(btnT); actions.appendChild(btnF);
+      card.appendChild(head); card.appendChild(actions); card.appendChild(result);
+      tfContainer.appendChild(card);
+    }
+  }
+
+  function handleTF(i, val, card, result, btnT, btnF){
+    if(tfState[i] !== null) return; // answered
+    const correct = tfQuestions[i].answer === val;
+    tfState[i] = val;
+    if(correct){
+      result.textContent = "Correct! " + tfQuestions[i].explain;
+      result.classList.add("good");
+      addScore(points.tf);
+      bumpStreak(true);
+    }else{
+      result.textContent = "Oops. " + tfQuestions[i].explain;
+      result.classList.add("bad");
+      bumpStreak(false);
+    }
+    tfAnsweredCount++;
+    btnT.disabled = true; btnF.disabled = true;
+    if(tfAnsweredCount === tfQuestions.length){
+      tfSubmitBtn.disabled = false;
+      celebrate();
+    }
+  }
+
+  tfSubmitBtn.addEventListener("click", ()=>{
+    stage2Complete = true;
+    setLocked(stage3El, false);
+    tfSubmitBtn.disabled = true;
+    document.querySelector("#stage2 .tag").textContent = "Completed!";
+    document.querySelector("#stage3 .tag").textContent = "Up to 20 pts each • Partial credit possible";
+    sa1El.focus();
+  });
+
+  // Stage 3: Short Answer
+  function normalize(str){
+    return str.toLowerCase().replace(/[.,;:!?\(\)\[\]"]/g," ").replace(/\s+/g," ").trim();
+  }
+
+  function gradeSA1(ans){
+    const text = normalize(ans);
+    const groups = {
+      carbohydrates: /(carb|starch|carbohydrate)/,
+      proteins: /(protein|amino acid)/,
+      fats: /(fat|lipid|triglyceride)/
+    };
+    let found = [];
+    if(groups.carbohydrates.test(text)) found.push("carbohydrates");
+    if(groups.proteins.test(text)) found.push("proteins");
+    if(groups.fats.test(text)) found.push("fats (lipids)");
+    found = Array.from(new Set(found));
+    let pts = 0;
+    let fb = "";
+    if(found.length === 3){
+      pts = points.sa1;
+      fb = "Great! You listed all three macronutrients: carbohydrates, proteins, and fats (lipids).";
+    } else if(found.length === 2){
+      pts = 10; // partial
+      const missing = ["carbohydrates","proteins","fats (lipids)"].filter(x => !found.includes(x));
+      fb = "Almost! You included: " + found.join(", ") + ". Missing: " + missing.join(", ") + ".";
+    } else if(found.length === 1){
+      pts = 5; // minimal
+      const missing = ["carbohydrates","proteins","fats (lipids)"].filter(x => !found.includes(x));
+      fb = "Some progress. You included: " + found[0] + ". Missing: " + missing.join(", ") + ".";
+    } else {
+      fb = "Try again. Look for the three macronutrient groups our body digests.";
+    }
+    return { pts, fb, sample: "Carbohydrates, proteins, and fats (lipids)." };
+  }
+
+  function gradeSA2(ans){
+    const text = normalize(ans);
+    let pts = 0;
+    let parts = [];
+    const enzyme = /(enzyme|amylase|lipase|protease|trypsin|chymotrypsin|pancreatic juice)/.test(text);
+    const bicarb = /(bicarbonate|neutraliz|alkaline|base)/.test(text);
+    const location = /(small intestine|duodenum|intestin)/.test(text);
+    if(enzyme){ pts += 10; parts.push("enzymes"); }
+    if(bicarb){ pts += 6; parts.push("bicarbonate/neutralizes acid"); }
+    if(location){ pts += 4; parts.push("delivers to small intestine"); }
+
+    let fb = "";
+    if(pts >= 16){
+      fb = "Nice! You described the pancreas well (" + parts.join(", ") + ").";
+    } else if(pts >= 10){
+      fb = "Good start. You mentioned: " + parts.join(", ") + ". Add details about enzymes and how bicarbonate neutralizes acid entering the small intestine.";
+    } else if(pts > 0){
+      fb = "Partial. Consider that the pancreas releases digestive enzymes and bicarbonate into the small intestine.";
+    } else {
+      fb = "Hint: Think about what the pancreas releases and where it releases it.";
+    }
+    const sample = "The pancreas produces digestive enzymes (like amylase, lipase, and proteases) and bicarbonate. These enter the small intestine (duodenum) to break down food and neutralize stomach acid.";
+    return { pts: Math.min(points.sa2, pts), fb, sample };
+  }
+
+  function showFinal(){
+    finalEl.hidden = false;
+    let msg = "";
+    if(score >= 90) msg = "Digestive Dynamo! You absolutely crushed it!";
+    else if(score >= 75) msg = "Stellar work! You’re on the road to mastery.";
+    else if(score >= 60) msg = "Nice effort! A little more practice and you’re golden.";
+    else msg = "Good try! Review the feedback and give it another go.";
+
+    finalMsg.textContent = msg;
+    const stars = Math.round((score/100)*5);
+    let starStr = "";
+    for(let i=0;i<5;i++){
+      starStr += `<span class="star">${i<stars?"★":"☆"}</span>`;
+    }
+    finalStars.innerHTML = starStr;
+
+    if(score > best){
+      best = score;
+      localStorage.setItem("digest-best", String(best));
+      bestEl.textContent = best;
+    }
+    celebrate();
+  }
+
+  saHintBtn.addEventListener("click", ()=>{
+    sa1Fb.innerHTML = "Macronutrients are the big three your body breaks down for energy and building: carbs, proteins, and fats.";
+    sa2Fb.innerHTML = "Think: enzymes + bicarbonate ➜ into the small intestine to help digestion and neutralize acid.";
+  });
+
+  saCheckBtn.addEventListener("click", ()=>{
+    if(stage3Complete) return;
+    const a1 = sa1El.value;
+    const a2 = sa2El.value;
+    const r1 = gradeSA1(a1);
+    const r2 = gradeSA2(a2);
+
+    sa1Fb.innerHTML = `${r1.fb} <br><span class="note">Sample: ${r1.sample}</span>`;
+    sa2Fb.innerHTML = `${r2.fb} <br><span class="note">Sample: ${r2.sample}</span>`;
+
+    addScore(r1.pts);
+    addScore(r2.pts);
+    stage3Complete = true;
+    showFinal();
+  });
+
+  playAgainBtn.addEventListener("click", ()=>{
+    // Restart from Stage 1 but keep best
+    hardReset(false);
+  });
+  resetBtn.addEventListener("click", ()=>{
+    hardReset(true);
+  });
+
+  function hardReset(clearBest){
+    score = 0; streak = 0; updateHUD();
+    mcIndex = 0; mcAnswered = false; stage1Complete=false; stage2Complete=false; stage3Complete=false;
+    tfAnsweredCount = 0; tfState.fill(null);
+    sa1El.value = ""; sa2El.value=""; sa1Fb.textContent=""; sa2Fb.textContent="";
+    finalEl.hidden = true;
+    setLocked(stage2El, true);
+    setLocked(stage3El, true);
+    renderMC();
+    renderTF();
+    tfSubmitBtn.disabled = true;
+    document.querySelector("#stage2 .tag").textContent = "5 pts each • Instant feedback";
+    document.querySelector("#stage3 .tag").textContent = "Up to 20 pts each • Partial credit possible";
+    if(clearBest){
+      localStorage.removeItem("digest-best");
+      best = 0; bestEl.textContent = "0";
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener("keydown", (e)=>{
+    const key = e.key.toLowerCase();
+    // MC answers a,b,c,d
+    if(!stage1Complete){
+      const letters = ["a","b","c","d"];
+      const idx = letters.indexOf(key);
+      if(idx>=0){
+        const btn = mcOptsEl.querySelector(`.opt[data-index="${idx}"]`);
+        if(btn) btn.click();
+      }
+      if(key === "enter" && !mcNextBtn.disabled) mcNextBtn.click();
+      if(key === "s") mcSkipBtn.click();
+    } else if(!stage2Complete){
+      // T/F keyboard for focused card
+      const focused = document.activeElement;
+      if(focused && focused.classList.contains("tf-card")){
+        const i = parseInt(focused.dataset.index,10);
+        if(key === "t") focused.querySelectorAll(".btn")[0].click();
+        if(key === "f") focused.querySelectorAll(".btn")[1].click();
+      }
+      if(key === "enter" && !tfSubmitBtn.disabled) tfSubmitBtn.click();
+    } else if(!stage3Complete){
+      if(key === "enter" && (e.metaKey || e.ctrlKey)) saCheckBtn.click();
+    }
+    if(key === "r"){
+      // Retry current stage
+      if(!stage1Complete){
+        mcIndex = 0; mcAnswered = false; streak = 0; renderMC(); updateHUD();
+      } else if(!stage2Complete){
+        tfState.fill(null); renderTF(); tfSubmitBtn.disabled = true; streak = 0; updateHUD();
+      } else if(!stage3Complete){
+        sa1El.value=""; sa2El.value=""; sa1Fb.textContent=""; sa2Fb.textContent="";
+      }
+    }
+  });
+
+  // Initialize
+  renderMC();
+  renderTF();
+  updateHUD();
+
+  // Accessibility: focus first TF card when unlocked
+  const observer = new MutationObserver(()=>{
+    if(!stage2El.classList.contains("locked")){
+      const first = tfContainer.querySelector(".tf-card");
+      if(first) first.focus();
+      observer.disconnect();
+    }
+  });
+  observer.observe(stage2El, { attributes:true });
+
+})();
+</script>
+</body>
+</html>

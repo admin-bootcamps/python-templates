@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Doggo Academy — Learning Games about Dogs</title>
+<style>
+  :root{
+    --bg:#FFF9F2;
+    --card:#FFFFFF;
+    --accent:#FF6B6B;
+    --accent2:#4ECDC4;
+    --text:#2D2D2D;
+    --muted:#6B6B6B;
+    --good:#3BB54A;
+    --bad:#E94F37;
+    --glass: rgba(255,255,255,0.6);
+  }
+  *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{
+    margin:0;
+    padding:24px;
+    background: linear-gradient(135deg, #FFFAF4 0%, #F0FFF8 100%);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  header{
+    display:flex;
+    gap:16px;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  .logo{
+    width:72px;height:72px;border-radius:14px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-size:34px;box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  }
+  h1{margin:0;font-size:22px;}
+  p.lead{margin:0;color:var(--muted);font-size:14px;}
+
+  .container{
+    display:grid;
+    grid-template-columns: 330px 1fr;
+    gap:20px;
+    align-items:start;
+    max-width:1100px;margin:0 auto;
+  }
+
+  .sidebar{
+    background:var(--card);
+    border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(13,13,13,0.06);
+  }
+  .modes{display:flex;flex-direction:column;gap:10px;}
+  .mode-btn{
+    border:0;padding:12px 14px;border-radius:10px;background:linear-gradient(90deg,#fff,#fafafa);
+    cursor:pointer;text-align:left;display:flex;gap:12px;align-items:center;font-weight:600;
+    box-shadow:0 6px 12px rgba(50,50,93,0.06);
+  }
+  .mode-btn.active{background:linear-gradient(90deg,var(--accent2),var(--accent));color:white;box-shadow:0 10px 24px rgba(78,205,196,0.18);transform:translateY(-2px);}
+  .mode-emoji{font-size:20px}
+
+  .score-card{
+    margin-top:14px;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fbfbfb);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .score-num{font-weight:800;font-size:20px;color:var(--accent2);}
+  .controls{display:flex;gap:8px;margin-top:12px;}
+  .tiny{padding:8px 10px;border-radius:8px;border:0;background:#f3f3f3;cursor:pointer;}
+  .tiny.primary{background:var(--accent2);color:white;}
+
+  /* main card */
+  .main{
+    background:linear-gradient(180deg,#FFFFFF, #FBFFFF);
+    padding:18px;border-radius:14px;box-shadow:0 10px 30px rgba(9,25,40,0.06);
+    min-height:540px;
+  }
+
+  .game-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .subtitle{color:var(--muted);font-size:13px;margin:2px 0 12px 0;}
+  .play-area{background:linear-gradient(180deg,#FFF,#FCFFFB);padding:16px;border-radius:12px;border:1px solid rgba(0,0,0,0.03);min-height:420px;}
+
+  /* Quiz styles */
+  .question{font-size:18px;font-weight:700;margin-bottom:12px;display:flex;gap:12px;align-items:center;}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .option{
+    padding:12px;border-radius:10px;border:2px solid rgba(0,0,0,0.05);cursor:pointer;background:var(--glass);transition:all .14s;
+  }
+  .option:hover{transform:translateY(-4px);box-shadow:0 8px 18px rgba(0,0,0,0.06);}
+  .option.correct{border-color:rgba(59,181,74,0.9);background:linear-gradient(90deg,rgba(59,181,74,0.06),#fff);}
+  .option.wrong{border-color:rgba(233,79,55,0.9);background:linear-gradient(90deg,rgba(233,79,55,0.06),#fff);}
+  .feedback{margin-top:12px;font-weight:700;}
+
+  .progress{height:12px;background:#F2F4F7;border-radius:999px;overflow:hidden;margin-top:12px;}
+  .progress > div{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0%;transition:width .4s;}
+
+  /* Flashcards */
+  .flashcard-wrap{display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;height:360px;}
+  .card{
+    width:360px;height:220px;border-radius:14px;background:linear-gradient(135deg,#fff,#fffbf2);
+    display:flex;align-items:center;justify-content:center;font-size:20px;padding:18px;text-align:center;
+    box-shadow:0 14px 40px rgba(80,90,120,0.06);position:relative;transform-style:preserve-3d;transition:transform .6s;
+  }
+  .card.flipped{transform:rotateY(180deg)}
+  .card-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;backface-visibility:hidden;}
+  .card-back{transform:rotateY(180deg);font-size:16px;color:var(--muted)}
+  .flash-controls{display:flex;gap:10px;margin-top:12px;}
+
+  /* Matching */
+  .matching{
+    display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;
+  }
+  .draggables, .targets{
+    background:linear-gradient(180deg,#fff,#fbfbff);padding:12px;border-radius:10px;min-height:270px;
+  }
+  .draggable{
+    background:#fff;padding:10px;border-radius:10px;margin-bottom:8px;cursor:grab;border:1px solid rgba(0,0,0,0.06);
+    display:flex;align-items:center;gap:10px;
+  }
+  .draggable:active{cursor:grabbing;}
+  .target{
+    min-height:44px;padding:10px;border-radius:10px;border:2px dashed rgba(0,0,0,0.06);margin-bottom:10px;background:transparent;
+    display:flex;align-items:center;gap:10px;
+  }
+  .target.filled{border-style:solid;background:linear-gradient(90deg,#f8fffb,#ffffff);}
+  .check-area{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:10px;}
+
+  /* result */
+  .result{
+    display:flex;align-items:center;gap:12px;font-weight:800;padding:12px;border-radius:10px;margin-top:12px;
+  }
+  .result.good{background:linear-gradient(90deg,#e7fff0,#fff);}
+  .result.bad{background:linear-gradient(90deg,#fff0f0,#fff);}
+
+  footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center;}
+  .hint{font-size:13px;color:var(--muted);margin-top:8px;}
+
+  /* small */
+  @media (max-width:900px){
+    .container{grid-template-columns:1fr; padding:12px;}
+    .main{margin-top:16px;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🐶</div>
+  <div>
+    <h1>Doggo Academy</h1>
+    <p class="lead">Play three fun games to learn about dogs — quiz, flashcards & matching.</p>
+  </div>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <strong>Choose a game</strong>
+        <div class="hint">Practice facts, breeds, behavior and care.</div>
+      </div>
+      <div style="font-size:28px">🎾</div>
+    </div>
+
+    <div class="modes" style="margin-top:12px">
+      <button class="mode-btn active" data-mode="quiz"><span class="mode-emoji">❓</span> Quiz (Quick)</button>
+      <button class="mode-btn" data-mode="flashcards"><span class="mode-emoji">🃏</span> Flashcards</button>
+      <button class="mode-btn" data-mode="match"><span class="mode-emoji">🔗</span> Matching</button>
+    </div>
+
+    <div class="score-card">
+      <div>
+        <div style="font-size:12px;color:var(--muted)">Session Score</div>
+        <div class="score-num" id="sessionScore">0 pts</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;color:var(--muted)">Games played</div>
+        <div class="score-num" id="gamesPlayed">0</div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div style="font-size:13px;color:var(--muted)">Quick Controls</div>
+      <div class="controls">
+        <button class="tiny" id="shuffleAll">Shuffle</button>
+        <button class="tiny primary" id="resetAll">Reset</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="game-title">
+      <div>
+        <div style="font-weight:800">Game: <span id="gameName">Quiz</span></div>
+        <div class="subtitle" id="gameSubtitle">Test your dog knowledge — 10 questions</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="text-align:right">
+          <div style="font-size:12px;color:var(--muted)">Current Game Score</div>
+          <div style="font-weight:800;font-size:20px;color:var(--accent)"><span id="gameScore">0</span> pts</div>
+        </div>
+        <button class="tiny" id="helpBtn">Help</button>
+      </div>
+    </div>
+
+    <div class="play-area" id="playArea">
+      <!-- Content injected by JS -->
+    </div>
+  </main>
+</div>
+
+<footer>
+  Tip: Use the Shuffle and Reset buttons to get new combos. Have fun learning about dogs! 🐾
+</footer>
+
+<script>
+(() => {
+  // Data: question bank, flashcards, matching pairs
+  const questions = [
+    {
+      q: "Which sense is most highly developed in dogs?",
+      choices: ["Sight", "Smell", "Hearing", "Taste"],
+      a: 1,
+      info: "Dogs have an extraordinary sense of smell; far more sensitive than humans."
+    },
+    {
+      q: "What is a common social structure among wild canines like wolves?",
+      choices: ["Solo living", "Pack hierarchy", "Pair-only", "Flocks"],
+      a: 1,
+      info: "Many wild canines live in packs with social hierarchies, aiding hunting and survival."
+    },
+    {
+      q: "Which breed is known for its exceptional sense of smell & often used in detection?",
+      choices: ["Greyhound", "Labrador Retriever", "Chihuahua", "Siberian Husky"],
+      a: 1,
+      info: "Labradors are commonly used as detection and assistance dogs due to their noses and temperament."
+    },
+    {
+      q: "What behavior often indicates a dog is anxious or stressed?",
+      choices: ["Tail wagging fast", "Yawning and lip licking", "Ears up and alert", "Play bowing"],
+      a: 1,
+      info: "Yawning, lip licking, and yawning can be calming signals indicating stress or anxiety."
+    },
+    {
+      q: "How many teeth does an adult dog typically have?",
+      choices: ["28", "30", "42", "50"],
+      a: 2,
+      info: "Adult dogs usually have 42 teeth."
+    },
+    {
+      q: "Which food is toxic and should NOT be fed to dogs?",
+      choices: ["Plain rice", "Grapes and raisins", "Cooked chicken", "Carrots"],
+      a: 1,
+      info: "Grapes and raisins can cause kidney failure in dogs."
+    },
+    {
+      q: "What is 'crate training' primarily used for?",
+      choices: ["Punishment", "House training and safety", "Feeding only", "Exercise"],
+      a: 1,
+      info: "Crate training helps with house training and provides a safe den-like space."
+    },
+    {
+      q: "Which breed is famous for its short legs and long body?",
+      choices: ["Beagle", "Dachshund", "Dalmatian", "Boxer"],
+      a: 1,
+      info: "Dachshunds are known for their elongated bodies and short legs."
+    },
+    {
+      q: "Puppies should usually stay with their mother until at least how many weeks?",
+      choices: ["2 weeks", "4 weeks", "8 weeks", "16 weeks"],
+      a: 2,
+      info: "Puppies benefit from staying until at least 8 weeks for social and developmental reasons."
+    },
+    {
+      q: "Why are regular vet checkups important?",
+      choices: ["To groom the dog", "To update toys", "To detect and prevent health issues early", "To teach tricks"],
+      a: 2,
+      info: "Regular vet visits detect and prevent health problems early, and ensure vaccinations are up to date."
+    },
+    {
+      q: "Which activity helps provide both exercise and mental stimulation for dogs?",
+      choices: ["Watching TV", "Scent games and puzzle toys", "Sleeping", "Eating treats in bowl"],
+      a: 1,
+      info: "Scent games and puzzle toys challenge a dog's mind and body."
+    },
+    {
+      q: "Which grooming need is especially important for long-haired breeds?",
+      choices: ["Weekly tooth brushing", "Frequent ear cropping", "Regular brushing to prevent mats", "Short daily walks"],
+      a: 2,
+      info: "Long-haired dogs need frequent brushing to prevent mats and skin issues."
+    }
+  ];
+
+  const flashcards = [
+    {front: "Lifespan of a medium-sized dog", back: "Often around 10–13 years, depending on breed and care."},
+    {front: "Why socialization matters", back: "Early exposure to people, animals, and places reduces fear and builds confidence."},
+    {front: "What is neutering/spaying?", back: "Surgical procedures to prevent reproduction and can reduce certain health/behavior issues."},
+    {front: "Signs of good health", back: "Shiny coat, bright eyes, normal appetite, steady weight, and playful behavior."},
+    {front: "Common training tool: clicker", back: "Mark-and-reward training uses a clicker to signal the exact desired behavior."},
+    {front: "Brachycephalic breeds", back: "Short-nosed breeds (e.g., Bulldogs) that may have breathing difficulties."},
+    {front: "Dental care", back: "Brushing teeth and dental chews help prevent periodontal disease."},
+    {front: "Exercise needs", back: "Varies by breed: working breeds need lots; some small breeds need shorter bursts."},
+    {front: "Heat safety", back: "Avoid hot pavement and keep dogs hydrated; brachycephalic dogs are more heat-sensitive."},
+    {front: "Microchipping", back: "A permanent ID option that helps reunite lost dogs with owners."}
+  ];
+
+  const matchingPairs = [
+    {key:"Labrador Retriever", value:"Friendly retriever often used as assistance and detection dog (🐕‍🦺)"},
+    {key:"German Shepherd", value:"Intelligent, often used in police and service roles (🛡️)"},
+    {key:"Bulldog", value:"Stocky, wrinkled face, short muzzle — can be brachycephalic (😮‍💨)"},
+    {key:"Poodle", value:"Highly trainable, comes in sizes; notable curly coat (✂️)"},
+    {key:"Beagle", value:"Small hound with excellent nose used for scent work (👃)"},
+    {key:"Dachshund", value:"Long body, short legs, bred for burrowing/hunting (🦴)"}
+  ];
+
+  // Shuffle utility
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  // App state
+  let state = {
+    mode: 'quiz',
+    sessionScore: 0,
+    gamesPlayed: 0,
+    quiz: {
+      questions: [],
+      index: 0,
+      score: 0,
+      answered: false
+    },
+    flash: {
+      deck: [],
+      index: 0,
+      known: 0,
+      practice: 0
+    },
+    match: {
+      leftItems: [],
+      rightItems: [],
+      placed: {}, // target -> key
+      score: 0
+    }
+  };
+
+  // DOM references
+  const modeButtons = document.querySelectorAll('.mode-btn');
+  const playArea = document.getElementById('playArea');
+  const gameNameEl = document.getElementById('gameName');
+  const gameSubtitle = document.getElementById('gameSubtitle');
+  const sessionScoreEl = document.getElementById('sessionScore');
+  const gamesPlayedEl = document.getElementById('gamesPlayed');
+  const gameScoreEl = document.getElementById('gameScore');
+  const shuffleBtn = document.getElementById('shuffleAll');
+  const resetBtn = document.getElementById('resetAll');
+  const helpBtn = document.getElementById('helpBtn');
+
+  // Initialize app
+  function init(){
+    // bind mode buttons
+    modeButtons.forEach(btn => btn.addEventListener('click', () => {
+      modeButtons.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      switchMode(btn.dataset.mode);
+    }));
+
+    shuffleBtn.addEventListener('click', () => {
+      if(state.mode==='quiz') setupQuiz(true);
+      if(state.mode==='flashcards') setupFlash(true);
+      if(state.mode==='match') setupMatch(true);
+    });
+    resetBtn.addEventListener('click', resetAll);
+    helpBtn.addEventListener('click', showHelp);
+
+    // initial setup
+    setupQuiz();
+    render();
+  }
+
+  // Helpers to update score UI
+  function updateSessionUI(){
+    sessionScoreEl.textContent = state.sessionScore + ' pts';
+    gamesPlayedEl.textContent = state.gamesPlayed;
+  }
+
+  function updateGameScore(n){
+    gameScoreEl.textContent = n;
+  }
+
+  // Mode switch
+  function switchMode(mode){
+    state.mode = mode;
+    document.getElementById('gameName').textContent = mode.charAt(0).toUpperCase()+mode.slice(1);
+    if(mode === 'quiz'){
+      gameSubtitle.textContent = "Test your dog knowledge — 10 questions";
+      setupQuiz();
+    } else if(mode === 'flashcards'){
+      gameSubtitle.textContent = "Flip cards and mark whether you know them.";
+      setupFlash();
+    } else if(mode === 'match'){
+      gameSubtitle.textContent = "Match breeds to descriptions (drag & drop).";
+      setupMatch();
+    }
+    render();
+  }
+
+  // HELP dialog (simple)
+  function showHelp(){
+    alert("Tips:\n\nQuiz: Click an answer to see if it's correct. Keep going to earn points.\n\nFlashcards: Flip cards to see details. Mark 'Know it' or 'Need practice'.\n\nMatching: Drag names to the correct descriptions, then press 'Check'.\n\nUse Shuffle to reshuffle items and Reset to restart session scores.");
+  }
+
+  // RESET session
+  function resetAll(){
+    if(!confirm("Reset session score and games played?")) return;
+    state.sessionScore = 0;
+    state.gamesPlayed = 0;
+    updateSessionUI();
+    // reset per-game
+    setupQuiz();
+    setupFlash();
+    setupMatch();
+    render();
+  }
+
+  // QUIZ logic
+  function setupQuiz(shuffleOnly=false){
+    // choose 10 random questions
+    const pool = shuffle([...questions]).slice(0,10).map(q=>{
+      // copy with shuffled choices but keep correct index mapping
+      const choices = [...q.choices];
+      const correctText = q.choices[q.a];
+      const shuffled = shuffle(choices.slice());
+      const newIndex = shuffled.indexOf(correctText);
+      return {...q, choices: shuffled, a: newIndex};
+    });
+    state.quiz.questions = pool;
+    state.quiz.index = 0;
+    state.quiz.score = 0;
+    state.quiz.answered = false;
+    // show update
+    updateGameScore(state.quiz.score);
+    renderQuiz();
+  }
+
+  function renderQuiz(){
+    const qObj = state.quiz.questions[state.quiz.index];
+    if(!qObj){
+      // safety
+      playArea.innerHTML = "<div style='padding:12px'>No questions available.</div>";
+      return;
+    }
+
+    playArea.innerHTML = `
+      <div>
+        <div class="question"><span style="font-size:22px">Q${state.quiz.index+1}.</span> ${escapeHtml(qObj.q)}</div>
+        <div class="options" id="optionsWrap"></div>
+        <div class="progress"><div style="width:${((state.quiz.index)/state.quiz.questions.length)*100}%"></div></div>
+        <div id="feedbackWrap"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:14px;align-items:center">
+          <div style="font-size:13px;color:var(--muted)">Score: <strong style="color:var(--accent)">${state.quiz.score}</strong></div>
+          <div>
+            <button class="tiny" id="skipBtn">Skip</button>
+            <button class="tiny primary" id="nextBtn" ${state.quiz.answered? '' : 'disabled'}>Next</button>
+          </div>
+        </div>
+      </div>
+    `;
+    const optionsWrap = document.getElementById('optionsWrap');
+    qObj.choices.forEach((c, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'option';
+      btn.textContent = c;
+      btn.dataset.index = i;
+      btn.addEventListener('click', () => handleAnswer(i));
+      optionsWrap.appendChild(btn);
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+    document.getElementById('skipBtn').addEventListener('click', () => {
+      // move to next but no points
+      state.quiz.index++;
+      state.quiz.answered = false;
+      if(state.quiz.index >= state.quiz.questions.length){
+        endQuiz();
+      } else {
+        renderQuiz();
+        updateGameScore(state.quiz.score);
+      }
+    });
+
+    updateGameScore(state.quiz.score);
+  }
+
+  function handleAnswer(choiceIndex){
+    if(state.quiz.answered) return;
+    state.quiz.answered = true;
+    const qObj = state.quiz.questions[state.quiz.index];
+    const options = document.querySelectorAll('.option');
+    options.forEach(opt => {
+      const idx = Number(opt.dataset.index);
+      if(idx === qObj.a){
+        opt.classList.add('correct');
+      }
+      if(idx === choiceIndex && idx !== qObj.a){
+        opt.classList.add('wrong');
+      }
+      // disable further clicking
+      opt.style.pointerEvents = 'none';
+    });
+
+    const feedbackWrap = document.getElementById('feedbackWrap');
+    if(choiceIndex === qObj.a){
+      feedbackWrap.innerHTML = `<div class="result good">✅ Correct! +10 pts — <span style="font-weight:600;color:var(--muted)">${qObj.info || ''}</span></div>`;
+      state.quiz.score += 10;
+      state.sessionScore += 10;
+    } else {
+      feedbackWrap.innerHTML = `<div class="result bad">❌ Incorrect — ${escapeHtml(qObj.choices[qObj.a])} is right. <div style="font-weight:600;color:var(--muted)">${qObj.info || ''}</div></div>`;
+      // small penalty to encourage thinking
+      state.quiz.score = Math.max(0, state.quiz.score - 2);
+      state.sessionScore = Math.max(0, state.sessionScore - 2);
+    }
+    updateSessionUI();
+    updateGameScore(state.quiz.score);
+    // enable next
+    document.getElementById('nextBtn').disabled = false;
+  }
+
+  function nextQuestion(){
+    state.quiz.index++;
+    state.quiz.answered = false;
+    if(state.quiz.index >= state.quiz.questions.length){
+      endQuiz();
+    } else {
+      renderQuiz();
+    }
+  }
+
+  function endQuiz(){
+    state.gamesPlayed++;
+    updateSessionUI();
+    const total = state.quiz.score;
+    playArea.innerHTML = `
+      <div style="text-align:center;padding:18px">
+        <div style="font-size:34px">🎉 Quiz Complete</div>
+        <div style="font-size:18px;margin-top:8px">You scored <strong style="color:var(--accent)">${total}</strong> points</div>
+        <div style="margin-top:12px;color:var(--muted)">Review any answers by replaying or switch to Flashcards to reinforce topics.</div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
+          <button class="tiny primary" id="replayQuiz">Play Again</button>
+          <button class="tiny" id="toFlash">Open Flashcards</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('replayQuiz').addEventListener('click', () => { setupQuiz(); render(); });
+    document.getElementById('toFlash').addEventListener('click', () => { document.querySelector('[data-mode="flashcards"]').click(); });
+    updateGameScore(0);
+  }
+
+  // FLASHCARDS logic
+  function setupFlash(shuffleOnly=false){
+    state.flash.deck = shuffle([...flashcards]);
+    state.flash.index = 0;
+    state.flash.known = 0;
+    state.flash.practice = 0;
+    renderFlash();
+    updateGameScore(0);
+  }
+
+  function renderFlash(){
+    const card = state.flash.deck[state.flash.index];
+    if(!card){
+      playArea.innerHTML = `<div style="padding:12px">No flashcards.</div>`;
+      return;
+    }
+    playArea.innerHTML = `
+      <div class="flashcard-wrap">
+        <div class="card" id="flashCard">
+          <div class="card-face card-front" id="cardFront">${escapeHtml(card.front)}</div>
+          <div class="card-face card-back" id="cardBack">${escapeHtml(card.back)}</div>
+        </div>
+        <div class="flash-controls">
+          <button class="tiny" id="prevCard">◀ Prev</button>
+          <button class="tiny primary" id="flipCard">Flip</button>
+          <button class="tiny" id="nextCard">Next ▶</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="tiny" id="knowBtn" title="I know this one">Know it ✅</button>
+          <button class="tiny" id="needBtn" title="Need practice">Need practice 📝</button>
+          <div style="margin-left:10px;color:var(--muted);font-size:13px">Known: <strong id="knownCount">${state.flash.known}</strong> | Practice: <strong id="practCount">${state.flash.practice}</strong></div>
+        </div>
+      </div>
+    `;
+
+    const flashCard = document.getElementById('flashCard');
+    let flipped = false;
+    document.getElementById('flipCard').addEventListener('click', () => {
+      flipped = !flipped;
+      flashCard.classList.toggle('flipped', flipped);
+    });
+
+    document.getElementById('nextCard').addEventListener('click', () => {
+      state.flash.index = (state.flash.index + 1) % state.flash.deck.length;
+      renderFlash();
+    });
+    document.getElementById('prevCard').addEventListener('click', () => {
+      state.flash.index = (state.flash.index - 1 + state.flash.deck.length) % state.flash.deck.length;
+      renderFlash();
+    });
+
+    document.getElementById('knowBtn').addEventListener('click', () => {
+      state.flash.known++;
+      state.sessionScore += 5;
+      updateSessionUI();
+      document.getElementById('knownCount').textContent = state.flash.known;
+      // remove card from deck to focus on unknowns
+      state.flash.deck.splice(state.flash.index,1);
+      if(state.flash.deck.length===0){
+        endFlashSession();
+      } else {
+        state.flash.index = state.flash.index % state.flash.deck.length;
+        renderFlash();
+      }
+    });
+
+    document.getElementById('needBtn').addEventListener('click', () => {
+      state.flash.practice++;
+      state.sessionScore += 1;
+      updateSessionUI();
+      document.getElementById('practCount').textContent = state.flash.practice;
+      // move to next card
+      state.flash.index = (state.flash.index + 1) % state.flash.deck.length;
+      renderFlash();
+    });
+
+    updateGameScore(state.flash.known*5 + state.flash.practice*1);
+  }
+
+  function endFlashSession(){
+    state.gamesPlayed++;
+    updateSessionUI();
+    playArea.innerHTML = `
+      <div style="text-align:center;padding:18px">
+        <div style="font-size:30px">🏁 Flashcards Complete</div>
+        <div style="margin-top:8px;color:var(--muted)">Known: <strong>${state.flash.known}</strong> | Practice: <strong>${state.flash.practice}</strong></div>
+        <div style="margin-top:12px">
+          <button class="tiny primary" id="replayFlash">Restart Deck</button>
+          <button class="tiny" id="toMatch">Try Matching</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('replayFlash').addEventListener('click', () => { setupFlash(); render(); });
+    document.getElementById('toMatch').addEventListener('click', () => { document.querySelector('[data-mode="match"]').click(); });
+    updateGameScore(state.flash.known*5 + state.flash.practice*1);
+  }
+
+  // MATCHING logic
+  function setupMatch(shuffleOnly=false){
+    // left side keys, right side descriptions
+    const left = matchingPairs.map(p => p.key);
+    const right = matchingPairs.map(p => ({key:p.key, text:p.value}));
+    if(shuffleOnly){
+      shuffle(left); shuffle(right);
+    } else {
+      shuffle(left); shuffle(right);
+    }
+    state.match.leftItems = left;
+    state.match.rightItems = right;
+    state.match.placed = {};
+    state.match.score = 0;
+    renderMatch();
+    updateGameScore(0);
+  }
+
+  function renderMatch(){
+    // create draggables (left) and targets (right descriptions)
+    playArea.innerHTML = `
+      <div class="matching">
+        <div class="draggables" id="draggablesArea">
+          <div style="font-weight:700;margin-bottom:8px">Breeds (drag me)</div>
+        </div>
+        <div class="targets" id="targetsArea">
+          <div style="font-weight:700;margin-bottom:8px">Descriptions (drop here)</div>
+        </div>
+      </div>
+      <div class="check-area">
+        <button class="tiny primary" id="checkMatch">Check Answers</button>
+        <button class="tiny" id="resetMatch">Reset</button>
+        <div style="color:var(--muted)">Score: <strong id="matchScore">0</strong></div>
+      </div>
+    `;
+
+    const draggablesArea = document.getElementById('draggablesArea');
+    state.match.leftItems.forEach(key => {
+      const el = document.createElement('div');
+      el.className = 'draggable';
+      el.draggable = true;
+      el.id = 'drag-'+sanitizeId(key);
+      el.textContent = key;
+      el.dataset.key = key;
+      el.addEventListener('dragstart', dragStart);
+      draggablesArea.appendChild(el);
+    });
+
+    const targetsArea = document.getElementById('targetsArea');
+    state.match.rightItems.forEach((item, idx) => {
+      const t = document.createElement('div');
+      t.className = 'target';
+      t.id = 'target-'+idx;
+      t.dataset.key = item.key; // correct key
+      t.innerHTML = `<div style="flex:1">${item.text}</div><div style="min-width:120px;text-align:right;color:var(--muted)">Drop breed here</div>`;
+      t.addEventListener('dragover', dragOver);
+      t.addEventListener('drop', dropToTarget);
+      t.addEventListener('click', clickTargetSelect);
+      targetsArea.appendChild(t);
+    });
+
+    document.getElementById('checkMatch').addEventListener('click', evaluateMatch);
+    document.getElementById('resetMatch').addEventListener('click', setupMatch);
+    document.getElementById('matchScore').textContent = state.match.score;
+  }
+
+  // Drag events
+  function dragStart(ev){
+    ev.dataTransfer.setData('text/plain', ev.target.dataset.key);
+    // mark as dragging
+  }
+  function dragOver(ev){
+    ev.preventDefault();
+    ev.currentTarget.style.background = 'linear-gradient(90deg,#f0fff5,#fff)';
+  }
+  function dropToTarget(ev){
+    ev.preventDefault();
+    ev.currentTarget.style.background = '';
+    const key = ev.dataTransfer.getData('text/plain');
+    placeInTarget(ev.currentTarget, key);
+  }
+
+  // Also support clicking to place for touch users
+  let selectedDraggable = null;
+  document.addEventListener('click', (e) => {
+    // if clicked on a draggable, toggle selection
+    if(e.target.classList && e.target.classList.contains('draggable')){
+      // select
+      const all = document.querySelectorAll('.draggable');
+      all.forEach(a=>a.style.outline='none');
+      e.target.style.outline='3px solid rgba(78,205,196,0.25)';
+      selectedDraggable = e.target.dataset.key;
+    } else {
+      // clicking elsewhere - clear
+    }
+  });
+
+  function clickTargetSelect(ev){
+    // if something selected, place it
+    if(selectedDraggable){
+      placeInTarget(ev.currentTarget, selectedDraggable);
+      // remove selection outline
+      const all = document.querySelectorAll('.draggable');
+      all.forEach(a=>a.style.outline='none');
+      selectedDraggable = null;
+    }
+  }
+
+  function placeInTarget(targetEl, key){
+    // If same draggable already placed elsewhere, remove that placement
+    for(const t of document.querySelectorAll('.target')){
+      if(t.dataset.placedKey === key){
+        delete t.dataset.placedKey;
+        t.classList.remove('filled');
+        // restore draggable to list if needed
+      }
+    }
+    // attach label inside target
+    targetEl.dataset.placedKey = key;
+    targetEl.classList.add('filled');
+    // visually show placed item
+    const rightDiv = targetEl.querySelector('div');
+    // create small badge
+    let badge = targetEl.querySelector('.placed-badge');
+    if(!badge){
+      badge = document.createElement('div');
+      badge.className = 'placed-badge';
+      badge.style.marginLeft='8px';
+      badge.style.padding='6px 8px';
+      badge.style.borderRadius='8px';
+      badge.style.background='#fff';
+      badge.style.boxShadow='0 6px 14px rgba(0,0,0,0.06)';
+      badge.style.fontWeight='700';
+      badge.style.color='var(--accent2)';
+      badge.style.marginRight='8px';
+      badge.style.marginLeft='auto';
+      targetEl.appendChild(badge);
+    }
+    badge.textContent = key;
+    // hide draggable from left list
+    const dragEl = document.getElementById('drag-'+sanitizeId(key));
+    if(dragEl) dragEl.style.visibility = 'hidden';
+  }
+
+  function evaluateMatch(){
+    // check placed pairs
+    let correct = 0;
+    let total = state.match.rightItems.length;
+    for(const t of document.querySelectorAll('.target')){
+      const placed = t.dataset.placedKey;
+      const correctKey = t.dataset.key;
+      // clear any previous styles
+      t.style.borderColor = '';
+      t.style.boxShadow = '';
+      if(!placed) continue;
+      if(placed === correctKey){
+        correct++;
+        t.style.borderColor = 'rgba(59,181,74,0.9)';
+        t.style.boxShadow = 'inset 0 0 0 2px rgba(59,181,74,0.06)';
+      } else {
+        t.style.borderColor = 'rgba(233,79,55,0.9)';
+        t.style.boxShadow = 'inset 0 0 0 2px rgba(233,79,55,0.04)';
+      }
+    }
+    const pts = correct * 5;
+    state.match.score = pts;
+    state.sessionScore += pts;
+    state.gamesPlayed++;
+    updateSessionUI();
+    document.getElementById('matchScore').textContent = pts;
+    // show summary
+    const summary = document.createElement('div');
+    summary.style.marginTop='12px';
+    if(correct === total){
+      summary.innerHTML = `<div class="result good">🎉 All correct! +${pts} pts — Great job!</div>`;
+    } else {
+      summary.innerHTML = `<div class="result bad">You got ${correct}/${total} correct. +${pts} pts — Review & try again!</div>`;
+    }
+    // remove old summary and append
+    const existing = document.querySelector('.check-area');
+    if(existing && existing.parentNode){
+      // insert summary after existing
+      existing.parentNode.insertBefore(summary, existing.nextSibling);
+    }
+  }
+
+  // Utility functions
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  function sanitizeId(s){
+    return s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  }
+
+  // Render main area based on mode
+  function render(){
+    updateSessionUI();
+    if(state.mode === 'quiz'){
+      renderQuiz();
+    } else if(state.mode === 'flashcards'){
+      renderFlash();
+    } else if(state.mode === 'match'){
+      renderMatch();
+    }
+  }
+
+  // Start the app
+  init();
+
+  // Expose nothing to global scope intentionally
+})();
+</script>
+</body>
+</html>

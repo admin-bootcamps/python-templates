@@ -1,0 +1,330 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Heart Learning Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #74c69d, #f9ca24);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #e74c3c;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .question {
+            font-size: 1.5em;
+            margin: 20px 0;
+            padding: 10px;
+            background: #ecf0f1;
+            border-radius: 10px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .option:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        .option.correct {
+            background: #27ae60;
+        }
+        .option.incorrect {
+            background: #e74c3c;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.2em;
+            padding: 10px;
+            border-radius: 10px;
+            display: none;
+        }
+        .correct-feedback {
+            background: #d4edda;
+            color: #155724;
+        }
+        .incorrect-feedback {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .score {
+            font-size: 1.5em;
+            margin: 20px 0;
+            color: #e67e22;
+        }
+        .next-btn {
+            background: #9b59b6;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-top: 20px;
+            display: none;
+            transition: background 0.3s;
+        }
+        .next-btn:hover {
+            background: #8e44ad;
+        }
+        .start-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .start-btn:hover {
+            background: #e67e22;
+        }
+        .restart-btn {
+            background: #16a085;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-top: 20px;
+            display: none;
+            transition: background 0.3s;
+        }
+        .restart-btn:hover {
+            background: #138f7a;
+        }
+        .heart-icon {
+            font-size: 3em;
+            color: #e74c3c;
+            animation: beat 1s infinite;
+        }
+        @keyframes beat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .progress {
+            width: 100%;
+            height: 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #e74c3c;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .welcome {
+            display: block;
+        }
+        .game {
+            display: none;
+        }
+        .results {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="welcome">
+            <div class="heart-icon">❤️</div>
+            <h1>Human Heart Quiz</h1>
+            <p>Learn about the human heart through this fun quiz! Test your knowledge on its parts, functions, and more.</p>
+            <button class="start-btn" onclick="startGame()">Start Quiz</button>
+        </div>
+        <div class="game">
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="score" id="score">Score: 0 / 0</div>
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <button class="next-btn" onclick="nextQuestion()">Next Question</button>
+        </div>
+        <div class="results">
+            <h1>Quiz Complete!</h1>
+            <div class="score" id="final-score"></div>
+            <p id="final-message"></p>
+            <button class="restart-btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+    <script>
+        const questions = [
+            {
+                question: "What is the main function of the human heart?",
+                options: ["To pump blood", "To digest food", "To breathe", "To think"],
+                answer: 0
+            },
+            {
+                question: "Which part of the heart receives blood from the body?",
+                options: ["Left ventricle", "Right atrium", "Aorta", "Pulmonary artery"],
+                answer: 1
+            },
+            {
+                question: "How many chambers does the human heart have?",
+                options: ["2", "3", "4", "6"],
+                answer: 2
+            },
+            {
+                question: "What is the name of the valve between the left atrium and left ventricle?",
+                options: ["Tricuspid valve", "Mitral valve", "Aortic valve", "Pulmonary valve"],
+                answer: 1
+            },
+            {
+                question: "What does the heart pump to deliver oxygen?",
+                options: ["Air", "Blood", "Water", "Food"],
+                answer: 1
+            },
+            {
+                question: "Which artery carries oxygenated blood from the heart to the body?",
+                options: ["Pulmonary vein", "Vena cava", "Aorta", "Coronary artery"],
+                answer: 2
+            },
+            {
+                question: "What is the average resting heart rate for an adult?",
+                options: ["50-70 bpm", "60-100 bpm", "100-150 bpm", "200-250 bpm"],
+                answer: 1
+            },
+            {
+                question: "Which part of the heart pumps blood to the lungs?",
+                options: ["Left ventricle", "Right ventricle", "Atrium", "Valve"],
+                answer: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        function startGame() {
+            document.querySelector('.welcome').style.display = 'none';
+            document.querySelector('.game').style.display = 'block';
+            document.querySelector('.results').style.display = 'none';
+            currentQuestionIndex = 0;
+            score = 0;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('question').textContent = question.question;
+            document.getElementById('options').innerHTML = '';
+            document.getElementById('feedback').style.display = 'none';
+            document.querySelector('.next-btn').style.display = 'none';
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'option';
+                button.onclick = () => selectAnswer(index);
+                document.getElementById('options').appendChild(button);
+            });
+            updateProgress();
+            updateScore();
+        }
+
+        function selectAnswer(index) {
+            selectedAnswer = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, i) => {
+                if (i === questions[currentQuestionIndex].answer) {
+                    option.classList.add('correct');
+                } else if (i === index && i !== questions[currentQuestionIndex].answer) {
+                    option.classList.add('incorrect');
+                }
+                option.onclick = null; // Disable further clicks
+            });
+            const feedback = document.getElementById('feedback');
+            if (index === questions[currentQuestionIndex].answer) {
+                feedback.textContent = "Correct! Great job!";
+                feedback.className = 'feedback correct-feedback';
+                score++;
+            } else {
+                feedback.textContent = "Incorrect. The correct answer is: " + questions[currentQuestionIndex].options[questions[currentQuestionIndex].answer];
+                feedback.className = 'feedback incorrect-feedback';
+            }
+            feedback.style.display = 'block';
+            document.querySelector('.next-btn').style.display = 'inline-block';
+            updateScore();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestionIndex / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = `Score: ${score} / ${currentQuestionIndex + (selectedAnswer !== null ? 1 : 0)}`;
+        }
+
+        function showResults() {
+            document.querySelector('.game').style.display = 'none';
+            document.querySelector('.results').style.display = 'block';
+            document.getElementById('final-score').textContent = `Final Score: ${score} / ${questions.length}`;
+            let message = '';
+            if (score >= questions.length * 0.8) {
+                message = "Excellent! You're a heart expert!";
+            } else if (score >= questions.length * 0.5) {
+                message = "Good job! Keep learning about the heart.";
+            } else {
+                message = "Nice try! Review the heart's anatomy and try again.";
+            }
+            document.getElementById('final-message').textContent = message;
+            document.querySelector('.restart-btn').style.display = 'inline-block';
+        }
+
+        function restartGame() {
+            startGame();
+        }
+    </script>
+</body>
+</html>
+```

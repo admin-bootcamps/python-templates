@@ -1,0 +1,255 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System Quiz Adventure</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #001122, #003366);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+        }
+        h1 {
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px #000;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 2px 2px 4px #000; }
+            to { text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00; }
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 20px #00aaff;
+        }
+        .question {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6600, #ff9933);
+            border: none;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            background: linear-gradient(45deg, #ff9933, #ffcc66);
+            transform: scale(1.05);
+        }
+        button.correct {
+            background: #00ff00;
+        }
+        button.incorrect {
+            background: #ff0000;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 18px;
+            height: 30px;
+        }
+        .score {
+            font-size: 20px;
+            color: #ffff00;
+            margin-bottom: 20px;
+        }
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .star {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        #nextBtn {
+            background: linear-gradient(45deg, #00aaff, #66ccff);
+            margin-top: 20px;
+        }
+        #restartBtn {
+            background: linear-gradient(45deg, #ff3366, #ff6699);
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="container">
+        <h1>Solar System Quiz Adventure 🚀</h1>
+        <div class="score" id="score">Score: 0/10</div>
+        <div class="question" id="question">Loading...</div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        <button id="nextBtn" style="display:none;">Next Question</button>
+        <button id="restartBtn" style="display:none;">Restart Quiz</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                correct: 1
+            },
+            {
+                question: "How many planets are in our solar system?",
+                options: ["7", "8", "9", "10"],
+                correct: 1
+            },
+            {
+                question: "What is the largest planet?",
+                options: ["Earth", "Saturn", "Jupiter", "Neptune"],
+                correct: 2
+            },
+            {
+                question: "Which planet has rings?",
+                options: ["Earth", "Mars", "Saturn", "Mercury"],
+                correct: 2
+            },
+            {
+                question: "What is the sun made of?",
+                options: ["Rock", "Gas and Plasma", "Ice", "Metal"],
+                correct: 1
+            },
+            {
+                question: "Which planet is closest to the Sun?",
+                options: ["Mercury", "Venus", "Earth", "Mars"],
+                correct: 0
+            },
+            {
+                question: "What is the name of Earth's moon?",
+                options: ["Luna", "Titan", "Europa", "Ganymede"],
+                correct: 0
+            },
+            {
+                question: "Which planet is known for its Great Red Spot?",
+                options: ["Mars", "Venus", "Jupiter", "Saturn"],
+                correct: 2
+            },
+            {
+                question: "How long does it take Earth to orbit the Sun?",
+                options: ["365 days", "30 days", "24 hours", "7 days"],
+                correct: 0
+            },
+            {
+                question: "Which dwarf planet is located in the Kuiper Belt?",
+                options: ["Ceres", "Pluto", "Eris", "Makemake"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        function loadQuestion() {
+            const q = questions[currentQuestionIndex];
+            document.getElementById('question').textContent = q.question;
+            document.getElementById('options').innerHTML = '';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('nextBtn').style.display = 'none';
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = option;
+                btn.onclick = () => selectAnswer(index, btn);
+                document.getElementById('options').appendChild(btn);
+            });
+        }
+
+        function selectAnswer(index, btn) {
+            selectedAnswer = index;
+            const q = questions[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.options button');
+            buttons.forEach((b, i) => {
+                if (i === q.correct) {
+                    b.classList.add('correct');
+                } else if (i === index && i !== q.correct) {
+                    b.classList.add('incorrect');
+                }
+                b.disabled = true;
+            });
+            if (index === q.correct) {
+                score++;
+                document.getElementById('feedback').textContent = "🎉 Correct! Great job!";
+            } else {
+                document.getElementById('feedback').textContent = "😞 Incorrect. The correct answer is: " + q.options[q.correct];
+            }
+            document.getElementById('score').textContent = `Score: ${score}/${questions.length}`;
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        document.getElementById('nextBtn').onclick = () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                endQuiz();
+            }
+        };
+
+        function endQuiz() {
+            document.getElementById('question').textContent = `Quiz Complete! Your final score: ${score}/${questions.length}`;
+            document.getElementById('options').innerHTML = '';
+            document.getElementById('feedback').textContent = score >= 7 ? "🌟 Excellent! You're a solar system expert!" : "👍 Good try! Keep exploring space!";
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'inline-block';
+        }
+
+        document.getElementById('restartBtn').onclick = () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedAnswer = null;
+            document.getElementById('score').textContent = `Score: 0/${questions.length}`;
+            document.getElementById('restartBtn').style.display = 'none';
+            loadQuestion();
+        };
+
+        // Add twinkling stars for fun background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        createStars();
+        loadQuestion();
+    </script>
+</body>
+</html>
+```

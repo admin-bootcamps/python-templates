@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deep Sea Explorer — Learning Games</title>
+<style>
+  :root{
+    --bg:#041422;
+    --card:#072b3a;
+    --accent:#00d4ff;
+    --accent2:#ff6b6b;
+    --muted:#94d3e2;
+    --glass: rgba(255,255,255,0.04);
+  }
+  *{box-sizing:border-box;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  body{
+    margin:0;
+    background: linear-gradient(180deg,#02121a 0%, #04293a 60%, #001219 100%);
+    color:#e6f7fa;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:30px;
+  }
+  .wrap{
+    width:1000px;
+    max-width:98%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  header{
+    padding:18px 22px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.08), rgba(255,255,255,0.01));
+    border-bottom:1px solid rgba(255,255,255,0.02);
+  }
+  .logo{
+    width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,#003b5c,#005f73);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6), inset 0 -4px 20px rgba(255,255,255,0.02);
+  }
+  h1{font-size:20px;margin:0}
+  p.lead{margin:0;color:var(--muted);font-size:13px}
+  .header-right{margin-left:auto;display:flex;gap:12px;align-items:center}
+  .score{
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);
+    display:flex;align-items:center;gap:8px;font-weight:600;
+  }
+  .score .value{color:var(--accent);font-size:18px}
+  nav{display:flex;gap:10px;padding:18px;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));}
+  .mode-btn{
+    padding:10px 14px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);cursor:pointer;
+    transition:all .18s;font-weight:600;
+  }
+  .mode-btn.active{background:linear-gradient(90deg,var(--accent) 0%, var(--accent2) 100%);color:#02121a;border:1px solid rgba(0,0,0,0.2);box-shadow:0 6px 18px rgba(0,0,0,0.4)}
+  .content{display:flex;gap:18px;padding:20px}
+  .left, .right{background:var(--card);padding:18px;border-radius:12px;flex:1;min-height:420px}
+  .right{flex:0.6}
+  .section-title{font-size:15px;margin:0 0 12px 0}
+  /* Matching */
+  .matching{
+    display:flex;gap:12px;
+  }
+  .desc-list, .names-list{
+    flex:1;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.03));
+    min-height:320px;overflow:auto;
+  }
+  .desc{
+    background:var(--glass);padding:12px;border-radius:8px;margin-bottom:10px;border:1px dashed rgba(255,255,255,0.03);
+    display:flex;align-items:center;gap:12px;justify-content:space-between;
+  }
+  .desc .hint{flex:1;color:#cfeff6;font-size:13px}
+  .dropzone{min-width:160px;height:44px;border-radius:8px;border:2px dashed rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;padding:6px;background:transparent;transition:all .12s}
+  .dropzone.hover{background:rgba(0,212,255,0.06);border-color:rgba(0,212,255,0.18)}
+  .name-pill{padding:8px 12px;background:linear-gradient(90deg,#053a4b,#0a5267);border-radius:999px;color:#cfeff6;display:inline-block;cursor:grab;border:1px solid rgba(255,255,255,0.03)}
+  .name-pill[draggable="false"]{opacity:0.5;cursor:default}
+  .feedback{height:30px;margin-top:8px}
+  /* Quiz */
+  .question-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:10px}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .choice{
+    padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);cursor:pointer;border:1px solid rgba(255,255,255,0.03);transition:all .12s;font-weight:600;
+  }
+  .choice:hover{transform:translateY(-3px)}
+  .choice.correct{background:linear-gradient(90deg, rgba(0,200,120,0.18), rgba(0,200,120,0.08));border-color:rgba(0,200,120,0.25);box-shadow:0 8px 20px rgba(0,200,120,0.06)}
+  .choice.wrong{background:linear-gradient(90deg, rgba(255,80,80,0.12), rgba(255,80,80,0.05));border-color:rgba(255,80,80,0.18)}
+  .explain{margin-top:10px;color:var(--muted);font-size:13px}
+  .nav-row{display:flex;gap:8px;margin-top:12px;align-items:center}
+  .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;background:var(--accent);color:#02121a;font-weight:700}
+  .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+  .small{padding:8px 10px;font-size:13px}
+  /* Flashcards */
+  .flash-area{display:flex;flex-direction:column;align-items:center;gap:12px;justify-content:center;height:100%}
+  .card{
+    width:260px;height:160px;border-radius:12px;background:linear-gradient(180deg,#053a4b,#072e3b);display:flex;align-items:center;justify-content:center;color:#cfeff6;font-weight:700;font-size:18px;box-shadow:0 10px 30px rgba(0,0,0,0.5);cursor:pointer;perspective:1000px;
+  }
+  .card-inner{width:100%;height:100%;border-radius:12px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;transition:transform .6s;position:relative}
+  .card.flipped .card-inner{transform:rotateY(180deg)}
+  .card .back{position:absolute;transform:rotateY(180deg);padding:18px;text-align:center}
+  .flash-controls{display:flex;gap:8px}
+  .hintless{color:rgba(255,255,255,0.7);font-size:13px}
+  footer{padding:12px 18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));display:flex;align-items:center;justify-content:space-between}
+  .reset{background:transparent;border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer}
+  /* confetti */
+  .confetti{position:absolute;pointer-events:none;left:0;top:0;width:100%;height:100%;overflow:hidden}
+  .dot{position:absolute;width:10px;height:14px;opacity:0.95;border-radius:3px}
+  /* small screens */
+  @media (max-width:880px){
+    .content{flex-direction:column}
+    .right{order:2}
+    .left{order:1}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div class="logo">DS</div>
+    <div>
+      <h1>Deep Sea Explorer</h1>
+      <p class="lead">Learn about extraordinary deep-sea animals through games: Match, Quiz, and Flashcards!</p>
+    </div>
+    <div class="header-right">
+      <div class="score" title="Your total score">
+        Score: <div class="value" id="score">0</div>
+      </div>
+      <button class="reset" id="resetBtn" title="Reset score and progress">Reset</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="mode-btn active" data-mode="matching">Matching</button>
+    <button class="mode-btn" data-mode="quiz">Quiz</button>
+    <button class="mode-btn" data-mode="flash">Flashcards</button>
+    <div style="margin-left:auto;color:var(--muted);align-self:center;font-weight:600">Deep Sea Animals</div>
+  </nav>
+
+  <div class="content">
+    <div class="left">
+      <h3 class="section-title" id="leftTitle">Matching — Match descriptions to animal names</h3>
+      <div id="leftContent">
+        <!-- Matching content injected here -->
+        <div class="matching">
+          <div class="desc-list" id="descList"></div>
+          <div class="names-list" id="namesList"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <div class="feedback" id="matchFeedback"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn small" id="checkMatches">Check</button>
+            <button class="btn secondary small" id="shuffleMatch">Shuffle</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right">
+      <h3 class="section-title" id="rightTitle">Your Deep Sea Log</h3>
+      <div id="rightContent">
+        <!-- Quiz / Flash content injected here -->
+        <div class="question-card" id="quizCard" style="display:none">
+          <div id="qNumber" style="font-weight:700;color:var(--muted)">Question 1/8</div>
+          <div id="questionText" style="margin-top:8px;font-size:17px"></div>
+          <div class="choices" id="choices"></div>
+          <div class="explain" id="explain" style="display:none"></div>
+          <div class="nav-row">
+            <button class="btn small" id="nextQ" disabled>Next</button>
+            <button class="btn secondary small" id="skipQ">Skip</button>
+            <div style="margin-left:auto;color:var(--muted)">Current Streak: <span id="streak">0</span></div>
+          </div>
+        </div>
+
+        <div class="flash-area" id="flashArea" style="display:none">
+          <div class="card" id="flashCard" title="Click to flip">
+            <div class="card-inner front" id="flashFront">Fact will appear here</div>
+            <div class="card-inner back" id="flashBack" style="display:none"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="btn small" id="gotIt">Got it (+2)</button>
+            <button class="btn secondary small" id="reviewIt">Review</button>
+            <button class="btn small" id="nextCard">Next</button>
+          </div>
+          <div style="margin-top:8px;color:var(--muted);font-size:13px">Flashcards reviewed: <span id="flashCount">0</span></div>
+        </div>
+
+        <div id="intro" style="color:var(--muted);font-size:14px">
+          Choose a mode above. Matching is a drag-and-drop game; Quiz tests your knowledge; Flashcards help memorization.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div style="color:var(--muted);font-size:13px">Tip: Try all modes to score more and master deep-sea facts!</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn secondary small" id="helpBtn">How to Play</button>
+      <div style="color:var(--muted);font-size:13px">Built for curious explorers</div>
+    </div>
+  </footer>
+
+  <div class="confetti" id="confetti"></div>
+</div>
+
+<script>
+(function(){
+  // Data
+  const animals = [
+    {
+      id: 'anglerfish',
+      name: 'Anglerfish',
+      fact: 'Has a bioluminescent lure (modified spine) that it dangles to attract prey in the dark.',
+      desc: 'A predator with a glowing lure sticking out of its head used to attract meals.'
+    },
+    {
+      id: 'giant-squid',
+      name: 'Giant squid',
+      fact: 'A massive cephalopod with long tentacles and enormous eyes adapted to deep water.',
+      desc: 'An enormous squid known for long tentacles and very large eyes—once legendary with ships.'
+    },
+    {
+      id: 'vampire-squid',
+      name: 'Vampire squid',
+      fact: 'A small cephalopod with cloak-like webbing and light-producing organs; survives low oxygen.',
+      desc: 'A cloaked-looking cephalopod adapted to oxygen-poor depths, often called a "vampire."'
+    },
+    {
+      id: 'barreleye',
+      name: 'Barreleye',
+      fact: 'Has a transparent head and tubular, upward-pointing eyes that can look through its skull.',
+      desc: 'A fish with a transparent head and tubular eyes that can rotate to look up through water.'
+    },
+    {
+      id: 'gulper-eel',
+      name: 'Gulper eel',
+      fact: 'Features an enormous hinged mouth that can swallow prey bigger than its body.',
+      desc: 'An eel with an enormous expandable mouth—almost like a pouch—to gulp down prey.'
+    },
+    {
+      id: 'viperfish',
+      name: 'Viperfish',
+      fact: 'Has long fang-like teeth and light-producing photophores; an ambush predator of the deep.',
+      desc: 'A terrifying-looking fish with huge teeth and glowing spots used for hunting at night.'
+    },
+    {
+      id: 'dumbo-octopus',
+      name: 'Dumbo octopus',
+      fact: 'Small benthic octopus with ear-like fins used for propulsion; lives on the seafloor.',
+      desc: 'A cute octopus with ear-like fins that propel it—often seen crawling on the deep seafloor.'
+    },
+    {
+      id: 'fangtooth',
+      name: 'Fangtooth',
+      fact: 'Has disproportionately large teeth for its size and survives at great depths.',
+      desc: 'A small but ferocious-looking fish with very large teeth relative to its body.'
+    }
+  ];
+
+  // State
+  let totalScore = Number(localStorage.getItem('deepsea-score') || 0);
+  let currentMode = 'matching';
+  let matchState = {}; // mapping descId -> nameId
+  let namesShuffled = [];
+  let quizQuestions = [];
+  let quizIndex = 0;
+  let streak = 0;
+  let flashIndex = 0;
+  let flashReviewed = 0;
+
+  // Elements
+  const scoreEl = document.getElementById('score');
+  const modeBtns = document.querySelectorAll('.mode-btn');
+  const leftTitle = document.getElementById('leftTitle');
+  const rightTitle = document.getElementById('rightTitle');
+  const descList = document.getElementById('descList');
+  const namesList = document.getElementById('namesList');
+  const matchFeedback = document.getElementById('matchFeedback');
+  const checkMatchesBtn = document.getElementById('checkMatches');
+  const shuffleMatchBtn = document.getElementById('shuffleMatch');
+
+  const introEl = document.getElementById('intro');
+  const quizCard = document.getElementById('quizCard');
+  const qNumber = document.getElementById('qNumber');
+  const questionText = document.getElementById('questionText');
+  const choicesEl = document.getElementById('choices');
+  const explainEl = document.getElementById('explain');
+  const nextQBtn = document.getElementById('nextQ');
+  const skipQBtn = document.getElementById('skipQ');
+  const streakEl = document.getElementById('streak');
+
+  const flashArea = document.getElementById('flashArea');
+  const flashCard = document.getElementById('flashCard');
+  const flashFront = document.getElementById('flashFront');
+  const flashBack = document.getElementById('flashBack');
+  const gotItBtn = document.getElementById('gotIt');
+  const reviewItBtn = document.getElementById('reviewIt');
+  const nextCardBtn = document.getElementById('nextCard');
+  const flashCountEl = document.getElementById('flashCount');
+
+  const resetBtn = document.getElementById('resetBtn');
+  const helpBtn = document.getElementById('helpBtn');
+  const confettiEl = document.getElementById('confetti');
+
+  // Initialize
+  updateScoreDisplay();
+  initMatching();
+  initQuiz();
+  initFlashcards();
+  attachModeHandlers();
+  attachReset();
+  attachHelp();
+
+  // MODE SWITCH
+  function attachModeHandlers(){
+    modeBtns.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        modeBtns.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMode = btn.dataset.mode;
+        renderMode();
+      });
+    });
+    renderMode();
+  }
+
+  function renderMode(){
+    // show/hide left/right content depending on mode
+    matchFeedback.textContent = '';
+    if(currentMode === 'matching'){
+      leftTitle.textContent = 'Matching — Match descriptions to animal names';
+      rightTitle.textContent = 'Your Deep Sea Log';
+      introEl.style.display = 'block';
+      quizCard.style.display = 'none';
+      flashArea.style.display = 'none';
+      // ensure matching visible in left (it is by default)
+    } else if(currentMode === 'quiz'){
+      leftTitle.textContent = 'Quiz — Test your knowledge';
+      rightTitle.textContent = 'Quiz Session';
+      introEl.style.display = 'none';
+      quizCard.style.display = 'block';
+      flashArea.style.display = 'none';
+      startQuiz();
+    } else if(currentMode === 'flash'){
+      leftTitle.textContent = 'Flashcards — Learn with facts';
+      rightTitle.textContent = 'Flashcards';
+      introEl.style.display = 'none';
+      quizCard.style.display = 'none';
+      flashArea.style.display = 'flex';
+      startFlashcards();
+    }
+  }
+
+  // SCORE
+  function updateScoreDisplay(){
+    scoreEl.textContent = totalScore;
+    localStorage.setItem('deepsea-score', totalScore);
+  }
+  function addScore(n){
+    totalScore += n;
+    if(totalScore < 0) totalScore = 0;
+    updateScoreDisplay();
+    if(n > 0){
+      celebrate();
+    }
+  }
+
+  // CONFETTI
+  function celebrate(){
+    // small confetti burst
+    for(let i=0;i<20;i++){
+      const d = document.createElement('div');
+      d.className = 'dot';
+      d.style.left = (50 + (Math.random()*40-20)) + '%';
+      d.style.top = '10%';
+      d.style.background = randomColor();
+      d.style.transform = 'rotate('+Math.random()*360+'deg)';
+      d.style.width = 6 + Math.random()*12 + 'px';
+      d.style.height = 8 + Math.random()*14 + 'px';
+      confettiEl.appendChild(d);
+      animateDot(d);
+    }
+    setTimeout(()=>{ confettiEl.innerHTML=''; }, 2000);
+  }
+  function animateDot(el){
+    const destX = (Math.random()*1200 - 600);
+    const destY = (400 + Math.random()*200);
+    el.animate([
+      { transform: 'translate(0,0) rotate(0deg)', opacity:1 },
+      { transform: `translate(${destX}px, ${destY}px) rotate(${Math.random()*720}deg)`, opacity:0.1 }
+    ], { duration: 1200 + Math.random()*800, easing: 'cubic-bezier(.17,.67,.83,.67)'});
+    setTimeout(()=>{ if(el.parentNode) el.parentNode.removeChild(el); }, 2200);
+  }
+  function randomColor(){
+    const cols = ['#FF6B6B','#FFD93D','#6BCB77','#4D96FF','#9D4EDD','#00D4FF','#FF7AA2'];
+    return cols[Math.floor(Math.random()*cols.length)];
+  }
+
+  // MATCHING
+  function initMatching(){
+    // Initialize names shuffled
+    namesShuffled = shuffleArray(animals.map(a=>a.id));
+    renderMatching();
+  }
+  function renderMatching(){
+    descList.innerHTML = '';
+    namesList.innerHTML = '';
+
+    animals.forEach(an=>{
+      const d = document.createElement('div');
+      d.className = 'desc';
+      d.dataset.id = an.id;
+
+      const hint = document.createElement('div');
+      hint.className = 'hint';
+      hint.textContent = an.desc;
+
+      const zone = document.createElement('div');
+      zone.className = 'dropzone';
+      zone.dataset.id = an.id;
+      zone.textContent = 'Drop name here';
+      zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('hover'); });
+      zone.addEventListener('dragleave', e=>{ zone.classList.remove('hover'); });
+      zone.addEventListener('drop', onDropName);
+
+      d.appendChild(hint);
+      d.appendChild(zone);
+      descList.appendChild(d);
+    });
+
+    // names list
+    namesShuffled.forEach(id=>{
+      const nameObj = animals.find(a=>a.id===id);
+      const pill = document.createElement('div');
+      pill.className = 'name-pill';
+      pill.textContent = nameObj.name;
+      pill.setAttribute('draggable','true');
+      pill.dataset.id = id;
+      pill.addEventListener('dragstart', e=>{
+        e.dataTransfer.setData('text/plain', id);
+        setTimeout(()=>pill.style.opacity = '0.4', 10);
+      });
+      pill.addEventListener('dragend', e=>{
+        pill.style.opacity = '1';
+      });
+      namesList.appendChild(pill);
+    });
+
+    // clear state
+    matchState = {};
+    matchFeedback.textContent = 'Drag names onto descriptions. Press "Check" or drop all to auto-check.';
+  }
+
+  function onDropName(e){
+    e.preventDefault();
+    e.currentTarget.classList.remove('hover');
+    const nameId = e.dataTransfer.getData('text/plain');
+    if(!nameId) return;
+    // find if name already placed somewhere else -> return it
+    // remove existing pill from namesList
+    const sourcePill = document.querySelector('.name-pill[data-id="'+nameId+'"]');
+    if(sourcePill && sourcePill.parentElement && sourcePill.parentElement.classList.contains('dropzone')){
+      // it was inside a dropzone - remove from that zone so we can reattach
+      sourcePill.parentElement.textContent = 'Drop name here';
+      sourcePill.parentElement.style.minWidth = '';
+    }
+    // place inside this dropzone
+    // if there's already a name in this zone, move it back to namesList
+    const zone = e.currentTarget;
+    // if the zone already contains a pill (i.e., first child not text), move it out
+    if(zone.dataset.occupied === 'true'){
+      const existing = zone.querySelector('.name-pill');
+      if(existing){
+        namesList.appendChild(existing);
+      }
+    }
+    // append the pill into zone
+    if(sourcePill){
+      zone.textContent = '';
+      zone.appendChild(sourcePill);
+      sourcePill.setAttribute('draggable', 'false');
+      zone.dataset.occupied = 'true';
+      matchState[zone.dataset.id] = nameId;
+    }
+    // if all placed, auto-check
+    const placed = Object.keys(matchState).length;
+    if(placed === animals.length){
+      checkMatches();
+    }
+  }
+
+  function checkMatches(){
+    let correct = 0;
+    animals.forEach(an=>{
+      const zone = document.querySelector('.dropzone[data-id="'+an.id+'"]');
+      const pill = zone.querySelector('.name-pill');
+      if(pill){
+        const placed = pill.dataset.id;
+        if(placed === an.id){
+          // correct
+          zone.style.background = 'linear-gradient(90deg, rgba(0,200,120,0.12), rgba(0,200,120,0.06))';
+          zone.style.borderColor = 'rgba(0,200,120,0.2)';
+          correct++;
+          // keep locked
+        } else {
+          zone.style.background = 'linear-gradient(90deg, rgba(255,80,80,0.08), rgba(255,80,80,0.04))';
+          zone.style.borderColor = 'rgba(255,80,80,0.15)';
+        }
+      } else {
+        zone.style.background = '';
+        zone.style.borderColor = '';
+      }
+    });
+    matchFeedback.textContent = `${correct}/${animals.length} correct`;
+    const newlyCorrect = correct; // can't calc incremental easily
+    // award points: +10 per correct match (but only for ones that are correct and not previously locked)
+    let pointsAwarded = 0;
+    animals.forEach(an=>{
+      const zone = document.querySelector('.dropzone[data-id="'+an.id+'"]');
+      const pill = zone.querySelector('.name-pill');
+      if(pill){
+        const placed = pill.dataset.id;
+        if(placed === an.id){
+          // if the pill is draggable=false we assume it's locked already; to avoid double awarding track via attribute 'data-awarded'
+          if(pill.dataset.awarded !== '1'){
+            pointsAwarded += 10;
+            pill.dataset.awarded = '1';
+            pill.style.cursor = 'default';
+          }
+        } else {
+          // incorrect -> return pill to list
+          namesList.appendChild(pill);
+          delete matchState[an.id];
+          zone.textContent = 'Drop name here';
+          zone.dataset.occupied = 'false';
+        }
+      }
+    });
+    if(pointsAwarded > 0){
+      addScore(pointsAwarded);
+      matchFeedback.textContent += ` — +${pointsAwarded} points!`;
+    }
+  }
+
+  shuffleMatchBtn.addEventListener('click', ()=>{
+    namesShuffled = shuffleArray(namesShuffled);
+    initMatching();
+  });
+
+  checkMatchesBtn.addEventListener('click', checkMatches);
+
+  // QUIZ
+  function initQuiz(){
+    // build a bank of questions from facts
+    quizQuestions = [
+      {
+        q: 'Which deep-sea animal uses a glowing lure to attract prey?',
+        a: 'Anglerfish',
+        choices: shuffleArray(['Anglerfish','Giant squid','Viperfish','Dumbo octopus']),
+        explain: 'The anglerfish has a bioluminescent lure (a modified dorsal spine) that it dangles to attract prey.'
+      },
+      {
+        q: 'Which animal has a transparent head and tubular, upward-facing eyes?',
+        a: 'Barreleye',
+        choices: shuffleArray(['Barreleye','Gulper eel','Vampire squid','Fangtooth']),
+        explain: 'Barreleye fish have a transparent head and tubular eyes that can rotate to look upwards.'
+      },
+      {
+        q: 'Which one can expand a huge mouth to swallow prey larger than its body?',
+        a: 'Gulper eel',
+        choices: shuffleArray(['Gulper eel','Dumbo octopus','Viperfish','Giant squid']),
+        explain: 'The gulper (pelican) eel has an enormous hinged mouth it can expand to gulp prey.'
+      },
+      {
+        q: 'Which cephalopod lives in oxygen-poor zones and looks cloaked?',
+        a: 'Vampire squid',
+        choices: shuffleArray(['Vampire squid','Giant squid','Dumbo octopus','Anglerfish']),
+        explain: 'The vampire squid lives in very low oxygen areas and has cloak-like webbing and bioluminescent organs.'
+      },
+      {
+        q: 'Which deep-sea fish is known for long fang-like teeth and photophores?',
+        a: 'Viperfish',
+        choices: shuffleArray(['Viperfish','Fangtooth','Barreleye','Anglerfish']),
+        explain: 'Viperfish have long fang-like teeth and photophores to help ambush prey in the dark.'
+      },
+      {
+        q: 'Which animal has ear-like fins used for swimming and lives on the seafloor?',
+        a: 'Dumbo octopus',
+        choices: shuffleArray(['Dumbo octopus','Giant squid','Viperfish','Barreleye']),
+        explain: 'Dumbo octopuses have ear-like fins (resembling Disney\'s Dumbo) that they use to swim near the seabed.'
+      },
+      {
+        q: 'Which deep-sea creature has disproportionately large teeth for its size?',
+        a: 'Fangtooth',
+        choices: shuffleArray(['Fangtooth','Vampire squid','Gulper eel','Anglerfish']),
+        explain: 'Fangtooth fish have very large teeth compared to their body size, giving a fierce appearance.'
+      },
+      {
+        q: 'Which is a very large cephalopod with long tentacles and huge eyes?',
+        a: 'Giant squid',
+        choices: shuffleArray(['Giant squid','Barreleye','Viperfish','Dumbo octopus']),
+        explain: 'Giant squids are enormous cephalopods with long tentacles and very large eyes adapted to deep water.'
+      }
+    ];
+  }
+
+  function startQuiz(){
+    // shuffle questions and reset index
+    quizQuestions = shuffleArray(quizQuestions.slice());
+    quizIndex = 0;
+    streak = 0;
+    streakEl.textContent = streak;
+    showQuizQuestion();
+  }
+
+  function showQuizQuestion(){
+    const q = quizQuestions[quizIndex];
+    qNumber.textContent = `Question ${quizIndex+1}/${quizQuestions.length}`;
+    questionText.textContent = q.q;
+    explainEl.style.display = 'none';
+    explainEl.textContent = '';
+    nextQBtn.disabled = true;
+    choicesEl.innerHTML = '';
+    q.choices.forEach(choice=>{
+      const c = document.createElement('div');
+      c.className = 'choice';
+      c.textContent = choice;
+      c.dataset.choice = choice;
+      c.addEventListener('click', ()=>selectChoice(c, q));
+      choicesEl.appendChild(c);
+    });
+  }
+
+  function selectChoice(el, q){
+    // disable further clicks
+    const all = choicesEl.querySelectorAll('.choice');
+    all.forEach(a=>a.style.pointerEvents = 'none');
+    const chosen = el.dataset.choice;
+    if(chosen === q.a){
+      el.classList.add('correct');
+      explainEl.textContent = 'Correct! ' + q.explain;
+      addScore(5);
+      streak++;
+    } else {
+      el.classList.add('wrong');
+      // reveal correct
+      all.forEach(a=>{
+        if(a.dataset.choice === q.a) a.classList.add('correct');
+      });
+      explainEl.textContent = 'Not quite. ' + q.explain;
+      streak = 0;
+    }
+    explainEl.style.display = 'block';
+    streakEl.textContent = streak;
+    nextQBtn.disabled = false;
+  }
+
+  nextQBtn.addEventListener('click', ()=>{
+    quizIndex++;
+    if(quizIndex >= quizQuestions.length){
+      // Finished quiz
+      explainEl.style.display = 'block';
+      explainEl.textContent = `Quiz complete! You earned points during the session.`;
+      nextQBtn.disabled = true;
+      // Auto-switch to matching after a pause? Just show summary
+    } else {
+      showQuizQuestion();
+    }
+  });
+
+  skipQBtn.addEventListener('click', ()=>{
+    // skip gives small penalty to encourage thought
+    addScore(-1);
+    quizIndex++;
+    if(quizIndex >= quizQuestions.length){
+      explainEl.style.display = 'block';
+      explainEl.textContent = 'Session finished. Thanks for trying the quiz!';
+      nextQBtn.disabled = true;
+    } else {
+      showQuizQuestion();
+    }
+  });
+
+  // FLASHCARDS
+  function initFlashcards(){
+    // reuse animals array but shuffle order when starting
+  }
+  function startFlashcards(){
+    flashIndex = 0;
+    flashReviewed = 0;
+    flashCountEl.textContent = flashReviewed;
+    flashOrder = shuffleArray(animals.slice());
+    showFlashcard();
+  }
+  let flashOrder = [];
+
+  function showFlashcard(){
+    if(!flashOrder.length) flashOrder = shuffleArray(animals.slice());
+    const item = flashOrder[flashIndex % flashOrder.length];
+    flashFront.textContent = item.fact;
+    flashBack.textContent = item.name;
+    flashCard.classList.remove('flipped');
+    // ensure inner display correct
+    flashFront.style.display = 'flex';
+    flashBack.style.display = 'none';
+  }
+  flashCard.addEventListener('click', ()=>{
+    // flip
+    if(flashCard.classList.contains('flipped')){
+      flashCard.classList.remove('flipped');
+      flashBack.style.display = 'none';
+      flashFront.style.display = 'flex';
+    } else {
+      flashCard.classList.add('flipped');
+      flashBack.style.display = 'flex';
+      flashFront.style.display = 'none';
+    }
+  });
+  gotItBtn.addEventListener('click', ()=>{
+    addScore(2);
+    flashReviewed++;
+    flashCountEl.textContent = flashReviewed;
+    nextFlash();
+  });
+  reviewItBtn.addEventListener('click', ()=>{
+    // put card near end for review
+    flashOrder.push(flashOrder[flashIndex % flashOrder.length]);
+    flashReviewed++;
+    flashCountEl.textContent = flashReviewed;
+    nextFlash();
+  });
+  nextCardBtn.addEventListener('click', ()=>{
+    nextFlash();
+  });
+  function nextFlash(){
+    flashIndex++;
+    if(flashIndex >= flashOrder.length){
+      flashIndex = 0;
+      flashOrder = shuffleArray(flashOrder);
+    }
+    showFlashcard();
+  }
+
+  // RESET & HELP
+  function attachReset(){
+    resetBtn.addEventListener('click', ()=>{
+      if(confirm('Reset score and game progress?')){
+        totalScore = 0;
+        updateScoreDisplay();
+        // reinit
+        initMatching();
+        initQuiz();
+        startFlashcards();
+        alert('Reset complete!');
+      }
+    });
+  }
+  function attachHelp(){
+    helpBtn.addEventListener('click', ()=>{
+      alert('How to play:\n\nMatching: Drag each animal name onto the description. Press "Check".\n\nQuiz: Answer multiple-choice questions. Correct answers give +5 points.\n\nFlashcards: Flip a card, then choose "Got it" (+2) or "Review".\n\nHave fun exploring deep-sea life!');
+    });
+  }
+
+  // UTILITIES
+  function shuffleArray(arr){
+    const copy = arr.slice();
+    for(let i=copy.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [copy[i],copy[j]] = [copy[j],copy[i]];
+    }
+    return copy;
+  }
+
+  // Small UX: Keyboard shortcuts
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === '1') document.querySelector('.mode-btn[data-mode="matching"]').click();
+    if(e.key === '2') document.querySelector('.mode-btn[data-mode="quiz"]').click();
+    if(e.key === '3') document.querySelector('.mode-btn[data-mode="flash"]').click();
+  });
+
+  // Initialize UI state on load
+  renderMode();
+
+})();
+</script>
+</body>
+</html>

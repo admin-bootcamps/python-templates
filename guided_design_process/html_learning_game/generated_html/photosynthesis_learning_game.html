@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Photosynthesis Adventure — Learning Game</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f0fff7;
+      --card:#ffffff;
+      --accent:#2e8b57;
+      --accent-2:#2b7fa3;
+      --muted:#6b7280;
+      --success:#16a34a;
+      --danger:#ef4444;
+      --gold:#f59e0b;
+      --glass: rgba(255,255,255,0.75);
+    }
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(800px 400px at 10% 10%, rgba(46,139,87,0.06), transparent 10%),
+        radial-gradient(700px 500px at 90% 90%, rgba(43,127,163,0.04), transparent 10%),
+        var(--bg);
+      color:#073642;
+      padding:20px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      gap:20px;
+    }
+
+    .container{
+      width:100%;
+      max-width:1100px;
+      background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.9));
+      border-radius:14px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.08);
+      padding:20px;
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:18px;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      padding:16px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(240,255,244,0.8));
+      border-radius:12px;
+      border:1px solid rgba(34,197,94,0.06);
+      height:fit-content;
+    }
+    h1{margin:0 0 8px 0; font-size:20px; color:var(--accent);}
+    p.lead{margin:0 0 12px 0; color:var(--muted); font-size:13px;}
+    .scoreboard{
+      display:flex;
+      gap:8px;
+      margin-bottom:8px;
+      align-items:center;
+    }
+    .score{
+      background:linear-gradient(180deg,#fff,#f6fff8);
+      padding:10px;
+      border-radius:10px;
+      border:1px solid rgba(0,0,0,0.04);
+      min-width:80px;
+      text-align:center;
+    }
+    .score .label{font-size:12px;color:var(--muted)}
+    .score .value{font-weight:700;font-size:18px;color:var(--accent);}
+    .highscore .value{color:var(--gold);}
+
+    .modes{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin:12px 0;
+    }
+
+    .mode-btn{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px;
+      border-radius:10px;
+      background:linear-gradient(180deg, #ffffff, #f8fffa);
+      border:1px solid rgba(0,0,0,0.04);
+      cursor:pointer;
+      transition:transform .12s, box-shadow .12s;
+    }
+    .mode-btn:hover{transform:translateY(-4px); box-shadow:0 8px 18px rgba(2,6,23,0.06);}
+    .mode-btn.active{outline:3px solid rgba(46,139,87,0.12);}
+
+    .mini{
+      font-size:12px;color:var(--muted)
+    }
+
+    .controls{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+    .btn{
+      border:0;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600;
+      background:linear-gradient(180deg,var(--accent),#1f6b48); color:white;
+      box-shadow:0 6px 14px rgba(46,139,87,0.12);
+      transition:transform .12s;
+    }
+    .btn.secondary{background:linear-gradient(180deg,#e6f6ff,#dff3ff); color:var(--accent-2); box-shadow:0 6px 14px rgba(43,127,163,0.06);}
+    .btn:active{transform:translateY(1px);}
+
+    .help{margin-top:12px;font-size:13px;color:var(--muted)}
+
+    /* Main area */
+    .main{
+      min-height:520px;
+      background:linear-gradient(180deg, #fff, rgba(250,255,250,0.9));
+      border-radius:12px;
+      padding:16px;
+      border:1px solid rgba(0,0,0,0.04);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .header-row{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+    }
+    .progress{
+      height:12px;background:rgba(0,0,0,0.06);border-radius:999px;overflow:hidden;
+      width:60%;
+      box-shadow:inset 0 -2px 6px rgba(0,0,0,0.03);
+    }
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .5s;}
+
+    .mode-title{font-size:18px;margin:0;color:#064e3b;font-weight:700;}
+    .subtitle{color:var(--muted);font-size:13px;margin:0;}
+
+    .card{
+      padding:14px;
+      border-radius:10px;
+      background:linear-gradient(180deg,#fff,#f7fffa);
+      border:1px solid rgba(0,0,0,0.03);
+    }
+
+    /* Quiz */
+    .question{font-size:18px;margin-bottom:10px;color:#065f46}
+    .options{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .option{
+      padding:10px;border-radius:10px;background:white;border:1px solid rgba(2,6,23,0.04);
+      cursor:pointer;transition:transform .09s, box-shadow .09s;
+      display:flex;align-items:center;gap:10px;
+    }
+    .option:hover{transform:translateY(-4px);box-shadow:0 8px 18px rgba(2,6,23,0.06);}
+    .option.correct{border-color:rgba(22,163,74,0.3);background:linear-gradient(180deg, rgba(34,197,94,0.06), #fff);}
+    .option.incorrect{border-color:rgba(239,68,68,0.17);background:linear-gradient(180deg, rgba(239,68,68,0.03), #fff);opacity:0.95;}
+    .option.disabled{pointer-events:none;opacity:0.8;}
+    .option .letter{
+      width:34px;height:34px;border-radius:8px;background:linear-gradient(180deg,#f6fffa,#e7fff0);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);
+      border:1px solid rgba(46,139,87,0.08);
+    }
+
+    .feedback{
+      margin-top:8px;font-weight:700;padding:10px;border-radius:10px;font-size:14px;
+    }
+    .feedback.correct{background:linear-gradient(90deg,#ecfdf5,#f0fff7);color:var(--success);border:1px solid rgba(16,185,129,0.06);}
+    .feedback.incorrect{background:linear-gradient(90deg,#fff7f7,#fff5f5);color:var(--danger);border:1px solid rgba(239,68,68,0.06);}
+
+    .quiz-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;}
+    .small{font-size:13px;color:var(--muted)}
+
+    /* Matching */
+    .match-area{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;}
+    .draggables, .targets{
+      flex:1;
+      min-width:220px;
+      display:grid;gap:10px;
+    }
+    .drag, .target{
+      padding:10px;border-radius:8px;background:linear-gradient(180deg,#fff,#f8fff8);border:1px dashed rgba(0,0,0,0.04);cursor:grab;
+      display:flex;align-items:center;gap:10px;
+    }
+    .drag.dragging{opacity:0.5}
+    .target.filled{border-style:solid;background:linear-gradient(180deg,#f0fff7,#ffffff);}
+    .pair{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+    /* Flashcards */
+    .flashcard{
+      width:100%;
+      height:300px;
+      border-radius:12px;
+      background:linear-gradient(180deg,#ffffff,#f7fff8);
+      box-shadow: 0 14px 40px rgba(2,6,23,0.06);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:20px;text-align:center;position:relative;
+      perspective:1200px;
+    }
+    .card-face{
+      width:100%;height:100%;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      backface-visibility:hidden;transform-style:preserve-3d;
+    }
+    .card-front{font-weight:800;font-size:26px;color:#065f46}
+    .card-back{position:absolute;transform:rotateY(180deg);padding:18px; font-size:16px;color:var(--muted)}
+    .card-inner{transition:transform .6s;transform-style:preserve-3d;width:100%;height:100%}
+    .card-inner.flipped{transform:rotateY(180deg);}
+
+    .flash-controls{display:flex;gap:8px;margin-top:12px;align-items:center;justify-content:center}
+
+    /* Celebration */
+    .celebrate{
+      padding:8px 12px;border-radius:999px;background:linear-gradient(90deg,#e6fff1,#f0fff7);color:var(--accent);display:inline-flex;align-items:center;gap:8px;
+      border:1px solid rgba(46,139,87,0.06);font-weight:700;box-shadow:0 8px 30px rgba(46,139,87,0.06);
+    }
+
+    footer{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .container{grid-template-columns:1fr; padding:12px;}
+      .sidebar{order:2}
+      .main{order:1}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="application" aria-label="Photosynthesis learning game">
+    <aside class="sidebar" aria-hidden="false">
+      <h1>Photosynthesis Adventure</h1>
+      <p class="lead">Play three fun modes to learn how plants turn sunlight into food!</p>
+
+      <div class="scoreboard">
+        <div class="score">
+          <div class="label">Score</div>
+          <div id="score" class="value">0</div>
+        </div>
+        <div class="score highscore">
+          <div class="label">High Score</div>
+          <div id="highscore" class="value">0</div>
+        </div>
+      </div>
+
+      <div class="modes" role="tablist" aria-label="Game modes">
+        <div id="btn-quiz" class="mode-btn active" role="tab" tabindex="0" aria-selected="true">
+          <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(180deg,#f0fff7,#e7fff0);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:800">Q</div>
+          <div>
+            <div style="font-weight:700">Quiz Quest</div>
+            <div class="mini">10 multiple-choice questions</div>
+          </div>
+        </div>
+
+        <div id="btn-match" class="mode-btn" role="tab" tabindex="0" aria-selected="false">
+          <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(180deg,#f0fbff,#e7f6ff);display:flex;align-items:center;justify-content:center;color:var(--accent-2);font-weight:800">M</div>
+          <div>
+            <div style="font-weight:700">Match Maker</div>
+            <div class="mini">Drag terms to definitions</div>
+          </div>
+        </div>
+
+        <div id="btn-flash" class="mode-btn" role="tab" tabindex="0" aria-selected="false">
+          <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(180deg,#fff8e6,#fff4e6);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:800">F</div>
+          <div>
+            <div style="font-weight:700">Flashcards</div>
+            <div class="mini">Flip & mark known</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="resetBtn" class="btn secondary" title="Reset score & progress">Reset</button>
+        <button id="shuffleBtn" class="btn secondary" title="Shuffle content">Shuffle</button>
+        <button id="shareBtn" class="btn" title="Celebrate score">Celebrate</button>
+      </div>
+
+      <div class="help">
+        Tip: Try Quiz for points, Match for bonus, and Flashcards to lock knowledge. Good luck!
+      </div>
+
+      <footer>
+        Photosynthesis basics — Sunlight, CO2, water → glucose + oxygen.
+      </footer>
+    </aside>
+
+    <main class="main" role="main">
+      <div class="header-row">
+        <div>
+          <h2 id="modeTitle" class="mode-title">Quiz Quest</h2>
+          <p id="modeSubtitle" class="subtitle">Test your knowledge — each correct answer +10 points</p>
+        </div>
+        <div style="width:40%">
+          <div class="progress" aria-hidden="true"><i id="progressFill" style="width:0%"></i></div>
+        </div>
+      </div>
+
+      <!-- Content area -->
+      <section id="contentArea" class="card" aria-live="polite">
+        <!-- Quiz content injected here -->
+      </section>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div id="feedbackArea"></div>
+        <div id="celebrateArea"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Photosynthesis learning game
+    (function(){
+      // Data
+      const quizQuestions = [
+        {q:"Where does photosynthesis primarily occur in plant cells?", choices:["Mitochondria","Chloroplasts","Nucleus","Ribosomes"], a:1, explain:"Chloroplasts contain chlorophyll and the thylakoid membranes where light reactions happen."},
+        {q:"Which two main substances are the reactants of photosynthesis?", choices:["Oxygen and glucose","Carbon dioxide and water","Nitrogen and water","Glucose and oxygen"], a:1, explain:"CO₂ and H₂O are used to make sugars and release O₂."},
+        {q:"What are the main products of photosynthesis?", choices:["Glucose and oxygen","Carbon dioxide and water","Nitrogen and oxygen","ATP and CO₂"], a:0, explain:"Photosynthesis produces sugars (e.g., glucose) and releases oxygen as a byproduct."},
+        {q:"Which pigment mainly captures light energy for photosynthesis?", choices:["Carotene","Chlorophyll","Xanthophyll","Hemoglobin"], a:1, explain:"Chlorophyll absorbs light (especially red and blue) and gives leaves their green color."},
+        {q:"Light-dependent reactions of photosynthesis produce which energy molecules?", choices:["ATP and NADPH","Glucose and oxygen","CO₂ and water","Amino acids"], a:0, explain:"ATP and NADPH carry energy and electrons to the Calvin cycle."},
+        {q:"The light-independent reactions (dark reactions) are also known as the:", choices:["Krebs cycle","Glycolysis","Calvin cycle","Electron transport chain"], a:2, explain:"The Calvin cycle fixes CO₂ into organic sugars using ATP and NADPH."},
+        {q:"Which gas is released into the atmosphere as a byproduct of photosynthesis?", choices:["Nitrogen","Oxygen","Carbon dioxide","Hydrogen"], a:1, explain:"Water is split in the light reactions, releasing oxygen."},
+        {q:"Photosynthesis mostly takes place in which part of a plant?", choices:["Roots","Stem","Leaves","Flowers"], a:2, explain:"Leaves contain many chloroplast-rich cells optimized for capturing light."},
+        {q:"Chlorophyll absorbs which colors of visible light the best?", choices:["Green and yellow","Red and blue","Orange and violet","Ultraviolet and infrared"], a:1, explain:"Chlorophyll absorbs red and blue wavelengths strongly; green is reflected."},
+        {q:"Which molecule provides electrons when water is split during light reactions?", choices:["Glucose","CO₂","Water (H₂O)","ATP"], a:2, explain:"Water supplies electrons (and protons), releasing O₂."}
+      ];
+
+      const matchingPairs = [
+        {term:"Chlorophyll", def:"Green pigment that absorbs light for photosynthesis."},
+        {term:"Stomata", def:"Pores on leaves that allow gas exchange (CO₂ in, O₂ out)."},
+        {term:"Thylakoid", def:"Membrane sacs in chloroplasts where light reactions occur."},
+        {term:"Calvin Cycle", def:"Series of reactions that fix CO₂ into sugars."},
+        {term:"NADPH", def:"Electron carrier produced in light reactions; used in the Calvin cycle."},
+        {term:"ATP", def:"Main energy currency produced in light-dependent reactions."},
+        {term:"Guard Cells", def:"Cells that open/close stomata to regulate gas exchange."},
+        {term:"Light-dependent reactions", def:"Stage of photosynthesis where light energy makes ATP & NADPH."},
+        {term:"Glucose", def:"A sugar produced as stored chemical energy by photosynthesis."},
+        {term:"Oxygen (O₂)", def:"Gas released as a byproduct when water is split."}
+      ];
+
+      const flashcards = [
+        {front:"Light-dependent reactions", back:"Use light to produce ATP and NADPH and split water."},
+        {front:"Calvin Cycle", back:"Uses ATP/NADPH to fix CO₂ into glucose and other sugars."},
+        {front:"Chloroplast", back:"Organelle where photosynthesis occurs; contains thylakoids & stroma."},
+        {front:"Stomata", back:"Tiny openings on leaves that exchange gases and water vapor."},
+        {front:"Chlorophyll", back:"Pigment that absorbs light, mainly red & blue wavelengths."}
+      ];
+
+      // State
+      let score = 0;
+      let highscore = Number(localStorage.getItem('ps_highscore') || 0);
+      let currentMode = 'quiz'; // quiz, match, flash
+      let quizIndex = 0;
+      let quizShuffled = shuffleArray([...quizQuestions]);
+      let matchShuffled = shuffleArray([...matchingPairs]);
+      let flashIndex = 0;
+      let flashKnown = {};
+      let progressValue = 0;
+
+      // Elements
+      const scoreEl = document.getElementById('score');
+      const highscoreEl = document.getElementById('highscore');
+      const contentArea = document.getElementById('contentArea');
+      const modeTitle = document.getElementById('modeTitle');
+      const modeSubtitle = document.getElementById('modeSubtitle');
+      const progressFill = document.getElementById('progressFill');
+      const feedbackArea = document.getElementById('feedbackArea');
+      const celebrateArea = document.getElementById('celebrateArea');
+
+      // Mode buttons
+      const btnQuiz = document.getElementById('btn-quiz');
+      const btnMatch = document.getElementById('btn-match');
+      const btnFlash = document.getElementById('btn-flash');
+      const resetBtn = document.getElementById('resetBtn');
+      const shuffleBtn = document.getElementById('shuffleBtn');
+      const shareBtn = document.getElementById('shareBtn');
+
+      // Initialize UI
+      scoreEl.textContent = score;
+      highscoreEl.textContent = highscore;
+
+      // Event listeners
+      btnQuiz.addEventListener('click', ()=>switchMode('quiz'));
+      btnMatch.addEventListener('click', ()=>switchMode('match'));
+      btnFlash.addEventListener('click', ()=>switchMode('flash'));
+      resetBtn.addEventListener('click', resetAll);
+      shuffleBtn.addEventListener('click', shuffleEverything);
+      shareBtn.addEventListener('click', showCelebrate);
+
+      // Keyboard accessibility
+      [btnQuiz, btnMatch, btnFlash].forEach(btn=>{
+        btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') btn.click(); });
+      });
+
+      // Start with quiz
+      renderQuiz();
+
+      // Utility functions
+      function shuffleArray(a){
+        const arr = a.slice();
+        for(let i=arr.length-1;i>0;i--){
+          const j = Math.floor(Math.random()*(i+1));
+          [arr[i],arr[j]]=[arr[j],arr[i]];
+        }
+        return arr;
+      }
+
+      function updateScore(delta){
+        score = Math.max(0, score + delta);
+        scoreEl.textContent = score;
+        if(score > highscore){ highscore = score; localStorage.setItem('ps_highscore', highscore); highscoreEl.textContent = highscore; }
+      }
+
+      function switchMode(mode){
+        currentMode = mode;
+        [btnQuiz, btnMatch, btnFlash].forEach(b=>b.classList.remove('active'));
+        if(mode==='quiz'){ btnQuiz.classList.add('active'); renderQuiz(); }
+        if(mode==='match'){ btnMatch.classList.add('active'); renderMatch(); }
+        if(mode==='flash'){ btnFlash.classList.add('active'); renderFlash(); }
+      }
+
+      function clearFeedback(){
+        feedbackArea.innerHTML = '';
+        celebrateArea.innerHTML = '';
+      }
+
+      function showFeedback(text, ok=true){
+        feedbackArea.innerHTML = `<div class="feedback ${ok?'correct':'incorrect'}">${ok? 'Correct!':'Not quite...'} ${text}</div>`;
+        setTimeout(()=>{ feedbackArea.innerHTML = ''; }, 5000);
+      }
+
+      function showCelebrate(){
+        celebrateArea.innerHTML = `<div class="celebrate">✨ Great job! Score: ${score}</div>`;
+        setTimeout(()=>{ celebrateArea.innerHTML = ''; }, 4000);
+      }
+
+      // ---------- QUIZ ----------
+      function renderQuiz(){
+        modeTitle.textContent = "Quiz Quest";
+        modeSubtitle.textContent = "Test your knowledge — each correct answer +10 points";
+        progressValue = Math.round((quizIndex / quizShuffled.length) * 100);
+        updateProgress();
+
+        const q = quizShuffled[quizIndex];
+        if(!q){
+          // done
+          contentArea.innerHTML = `
+            <div style="display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;padding:40px">
+              <div style="font-size:22px;font-weight:800;color:var(--accent)">Quiz Complete!</div>
+              <div style="color:var(--muted)">You finished the quiz. Keep practicing or try another game mode.</div>
+              <div style="display:flex;gap:8px;margin-top:10px">
+                <button id="replayQuiz" class="btn secondary">Replay Quiz</button>
+                <button id="goMatch" class="btn">Go to Match Maker</button>
+              </div>
+            </div>
+          `;
+          document.getElementById('replayQuiz').addEventListener('click', ()=>{
+            quizShuffled = shuffleArray([...quizQuestions]);
+            quizIndex = 0;
+            renderQuiz();
+          });
+          document.getElementById('goMatch').addEventListener('click', ()=>switchMode('match'));
+          return;
+        }
+
+        // Build options HTML
+        let optionsHTML = '';
+        const choices = q.choices.map((c,i)=>({c,i})).sort(()=>Math.random()-0.5);
+        choices.forEach(({c,i}, idx)=>{
+          optionsHTML += `<div class="option" role="button" tabindex="0" data-i="${i}">
+            <div class="letter">${String.fromCharCode(65+idx)}</div>
+            <div>${c}</div>
+          </div>`;
+        });
+
+        contentArea.innerHTML = `
+          <div>
+            <div class="question">${q.q}</div>
+            <div class="options">${optionsHTML}</div>
+            <div class="quiz-footer">
+              <div class="small">Question ${quizIndex+1} of ${quizShuffled.length}</div>
+              <div>
+                <button id="skipBtn" class="btn secondary">Skip</button>
+                <button id="nextQBtn" class="btn" style="display:none">Next</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Add listeners to options
+        const optionEls = Array.from(contentArea.querySelectorAll('.option'));
+        optionEls.forEach((opt)=>{
+          opt.addEventListener('click', ()=>handleOptionClick(opt, q));
+          opt.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') handleOptionClick(opt,q); });
+        });
+
+        document.getElementById('skipBtn').addEventListener('click', ()=>{
+          // small penalty for skip to encourage trying
+          updateScore(-2);
+          showFeedback('Skipped. -2 points', false);
+          // mark correct briefly, then move on
+          revealCorrectOption(q);
+          setTimeout(()=>{ quizIndex++; renderQuiz(); }, 1200);
+        });
+
+        function handleOptionClick(optEl, question){
+          const selected = Number(optEl.dataset.i);
+          // disable others
+          optionEls.forEach(o=>o.classList.add('disabled'));
+          const correctIndex = question.a;
+          if(selected === correctIndex){
+            // find & mark correct choice element
+            optEl.classList.add('correct');
+            updateScore(10);
+            showFeedback(question.explain, true);
+          } else {
+            optEl.classList.add('incorrect');
+            updateScore(-3); // penalty
+            showFeedback(question.explain, false);
+            // highlight correct after short delay
+            revealCorrectOption(question);
+          }
+          // show next button
+          document.getElementById('nextQBtn').style.display = 'inline-block';
+          document.getElementById('nextQBtn').addEventListener('click', ()=>{
+            quizIndex++;
+            renderQuiz();
+          }, {once:true});
+        }
+
+        function revealCorrectOption(question){
+          const optionElsNow = Array.from(contentArea.querySelectorAll('.option'));
+          optionElsNow.forEach(o=>{
+            if(Number(o.dataset.i) === question.a) o.classList.add('correct');
+          });
+        }
+      }
+
+      // ---------- MATCHING ----------
+      function renderMatch(){
+        modeTitle.textContent = "Match Maker";
+        modeSubtitle.textContent = "Drag a term onto its matching definition. Each correct pair +5 points.";
+
+        // Prepare pairs
+        matchShuffled = shuffleArray([...matchingPairs]);
+        const terms = shuffleArray(matchShuffled.map(p=>p.term));
+        const defs = shuffleArray(matchShuffled.map(p=>p.def));
+
+        // Build HTML
+        const draggablesHTML = terms.map((t, i)=>`<div class="drag" draggable="true" data-term="${escapeHtml(t)}" id="drag-${i}">${t}</div>`).join('');
+        const targetsHTML = defs.map((d, i)=>`<div class="target" data-def="${escapeHtml(d)}" id="target-${i}">${d}</div>`).join('');
+
+        contentArea.innerHTML = `
+          <div class="match-area">
+            <div style="flex:1">
+              <div style="font-weight:700;margin-bottom:10px">Terms</div>
+              <div class="draggables">${draggablesHTML}</div>
+            </div>
+            <div style="flex:2">
+              <div style="font-weight:700;margin-bottom:10px">Definitions</div>
+              <div class="targets">${targetsHTML}</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:8px">
+            <button id="checkMatch" class="btn">Check Matches</button>
+            <button id="resetMatch" class="btn secondary">Reset</button>
+          </div>
+        `;
+
+        // DnD logic
+        const drags = Array.from(contentArea.querySelectorAll('.drag'));
+        const targetsEls = Array.from(contentArea.querySelectorAll('.target'));
+
+        drags.forEach(d=>{
+          d.addEventListener('dragstart', (e)=>{
+            e.dataTransfer.setData('text/plain', d.dataset.term);
+            d.classList.add('dragging');
+            setTimeout(()=>d.style.opacity='0.4',0);
+          });
+          d.addEventListener('dragend', ()=>{
+            d.classList.remove('dragging');
+            d.style.opacity='1';
+          });
+        });
+
+        targetsEls.forEach(t=>{
+          t.addEventListener('dragover', (e)=>{ e.preventDefault(); t.style.borderColor='rgba(43,127,163,0.3)'; });
+          t.addEventListener('dragleave', ()=>{ t.style.borderColor='rgba(0,0,0,0.04)'; });
+          t.addEventListener('drop', (e)=>{
+            e.preventDefault();
+            t.style.borderColor='rgba(0,0,0,0.04)';
+            const term = e.dataTransfer.getData('text/plain');
+            // attach small pill
+            if(t.querySelector('.pill')) t.querySelector('.pill').remove();
+            const pill = document.createElement('div');
+            pill.className = 'pill';
+            pill.textContent = term;
+            pill.style.padding = '6px 10px';
+            pill.style.borderRadius = '8px';
+            pill.style.background = 'linear-gradient(180deg,#f0fff7,#ffffff)';
+            pill.style.border = '1px solid rgba(46,139,87,0.06)';
+            pill.style.display = 'inline-block';
+            t.appendChild(pill);
+            t.classList.add('filled');
+            t.dataset.attached = term;
+            // hide the term in list
+            const termEl = drags.find(dd=>dd.dataset.term===term);
+            if(termEl) termEl.style.visibility='hidden';
+          });
+        });
+
+        document.getElementById('resetMatch').addEventListener('click', ()=>{
+          renderMatch();
+        });
+
+        document.getElementById('checkMatch').addEventListener('click', ()=>{
+          // Evaluate
+          let correctCount = 0;
+          targetsEls.forEach(t=>{
+            const attached = t.dataset.attached;
+            if(!attached) return;
+            const def = t.dataset.def;
+            // check if pair matches original
+            const pair = matchShuffled.find(p => p.term === attached && p.def === def);
+            if(pair) {
+              t.style.borderColor = 'rgba(16,185,129,0.2)';
+              t.style.background = 'linear-gradient(180deg,#ecfdf5,#ffffff)';
+              correctCount++;
+            } else {
+              t.style.borderColor = 'rgba(239,68,68,0.12)';
+              t.style.background = 'linear-gradient(180deg,#fff7f7,#ffffff)';
+            }
+          });
+
+          const gained = correctCount * 5;
+          updateScore(gained);
+          showFeedback(`${correctCount} correct pair(s). +${gained} points`, correctCount>0);
+
+          // Reveal correct answers for the rest
+          targetsEls.forEach(t=>{
+            if(t.dataset.attached) return;
+            // show correct term for this definition
+            const defText = t.dataset.def;
+            const correctPair = matchShuffled.find(p=>p.def===defText);
+            const pill = document.createElement('div');
+            pill.style.fontSize='12px';
+            pill.style.color='var(--muted)';
+            pill.textContent = `Answer: ${correctPair.term}`;
+            pill.style.marginTop='6px';
+            t.appendChild(pill);
+          });
+
+        });
+      }
+
+      // ---------- FLASHCARDS ----------
+      function renderFlash(){
+        modeTitle.textContent = "Flashcards";
+        modeSubtitle.textContent = "Flip the card and mark as Known (+3) or Review (-1).";
+
+        // ensure index wraps around
+        if(flashIndex >= flashcards.length) flashIndex = 0;
+        const card = flashcards[flashIndex];
+
+        contentArea.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+            <div class="flashcard" id="flashcard">
+              <div class="card-inner" id="cardInner">
+                <div class="card-face card-front card-inner-face">
+                  <div style="font-size:14px;color:var(--muted);margin-bottom:6px">Term</div>
+                  <div class="card-front">${card.front}</div>
+                </div>
+                <div class="card-face card-back">
+                  <div style="font-size:14px;color:var(--muted);margin-bottom:6px">Definition</div>
+                  <div>${card.back}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flash-controls">
+              <button id="flipBtn" class="btn secondary">Flip</button>
+              <button id="knownBtn" class="btn">Known (+3)</button>
+              <button id="reviewBtn" class="btn secondary">Review (-1)</button>
+              <button id="nextFlashBtn" class="btn">Next</button>
+            </div>
+            <div class="small">Card ${flashIndex+1} of ${flashcards.length}</div>
+          </div>
+        `;
+
+        const cardInner = document.getElementById('cardInner');
+        const flipBtn = document.getElementById('flipBtn');
+        const knownBtn = document.getElementById('knownBtn');
+        const reviewBtn = document.getElementById('reviewBtn');
+        const nextFlashBtn = document.getElementById('nextFlashBtn');
+
+        flipBtn.addEventListener('click', ()=>cardInner.classList.toggle('flipped'));
+        document.getElementById('flashcard').addEventListener('click', ()=>cardInner.classList.toggle('flipped'));
+
+        knownBtn.addEventListener('click', ()=>{
+          updateScore(3);
+          flashKnown[card.front] = true;
+          showFeedback('Marked as known. +3 points', true);
+        });
+        reviewBtn.addEventListener('click', ()=>{
+          updateScore(-1);
+          flashKnown[card.front] = false;
+          showFeedback('Marked for review. -1 point', false);
+        });
+        nextFlashBtn.addEventListener('click', ()=>{
+          flashIndex = (flashIndex + 1) % flashcards.length;
+          renderFlash();
+        });
+      }
+
+      // ---------- Controls ----------
+      function resetAll(){
+        if(!confirm('Reset score and progress?')) return;
+        score = 0;
+        quizIndex = 0;
+        quizShuffled = shuffleArray([...quizQuestions]);
+        matchShuffled = shuffleArray([...matchingPairs]);
+        flashIndex = 0;
+        flashKnown = {};
+        updateScore(0); // update UI
+        scoreEl.textContent = score;
+        highscore = 0;
+        localStorage.setItem('ps_highscore', 0);
+        highscoreEl.textContent = 0;
+        renderQuiz();
+        clearFeedback();
+      }
+
+      function shuffleEverything(){
+        quizShuffled = shuffleArray([...quizQuestions]);
+        matchShuffled = shuffleArray([...matchingPairs]);
+        flashIndex = 0;
+        flashKnown = {};
+        showFeedback('Shuffled content. Fresh practice!', true);
+        if(currentMode==='quiz') renderQuiz();
+        if(currentMode==='match') renderMatch();
+        if(currentMode==='flash') renderFlash();
+      }
+
+      function updateProgress(){
+        progressFill.style.width = `${progressValue}%`;
+      }
+
+      // Small helper to escape values for data attributes
+      function escapeHtml(s){
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      }
+
+      // For accessibility: announce score changes
+      const liveRegion = document.createElement('div');
+      liveRegion.setAttribute('aria-live','polite');
+      liveRegion.style.position='absolute';
+      liveRegion.style.left='-9999px';
+      document.body.appendChild(liveRegion);
+
+      // Observe score updates to announce
+      const scoreObserver = new MutationObserver(()=>{ liveRegion.textContent = `Score is now ${score}`; });
+      scoreObserver.observe(scoreEl, {childList:true, characterData:true, subtree:true});
+
+      // Tiny confetti-ish celebrate on highscore
+      (function highscoreFlash(){
+        // fade effect on highscore element when it changes
+        let prev = highscore;
+        setInterval(()=>{
+          if(Number(localStorage.getItem('ps_highscore')||0) !== prev){
+            prev = Number(localStorage.getItem('ps_highscore')||0);
+            highscoreEl.textContent = prev;
+            celebrateArea.innerHTML = `<div class="celebrate">🏆 New High Score: ${prev}</div>`;
+            setTimeout(()=>{ celebrateArea.innerHTML = ''; }, 3200);
+          }
+        }, 800);
+      })();
+
+    })();
+  </script>
+</body>
+</html>
