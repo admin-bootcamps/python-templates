@@ -1,6 +1,6 @@
 # Gen-AI with Python
 
-This folder contains the sample Python files for Gen-AI activities.
+The python-templates repo contains the sample Python files for Gen-AI activities.
 
 We use OpenRouter API for Text > Text and Huggingface API for Text > Image.
 
@@ -139,7 +139,7 @@ For example:
 API_URL = "https://router.huggingface.co/fal-ai/fal-ai/sana/sprint"
 ```
 
-Here is the list of models we will use: [Fal Image Models](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/playgrounds/fal_models.json)
+Here is the list of models we will use: [Fal Image Models](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/playgrounds/playground_files/fal_models.json)
 
 An example of the 'model info':
 
@@ -446,7 +446,7 @@ Open the below link in your browser to view all the models.
 
 [OpenRouter's Models List](https://openrouter.ai/api/v1/models)
 
-At the bootcamp, you won't have access to all of these models. The models you can use can be found here: [OpenRouter Models for Bootcamp](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/playgrounds/openrouter_models.json)
+At the bootcamp, you won't have access to all of these models. The models you can use can be found here: [OpenRouter Models for Bootcamp](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/playgrounds/playground_files/openrouter_models.json)
 
 Here's an example of the model info.
 
