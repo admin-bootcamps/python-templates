@@ -1,6 +1,9 @@
-# Gen-AI with Python
+# README: Gen-AI with Python
 
-The python-templates repo contains the sample Python files for Gen-AI activities.
+This is the README.md file for the `pythom-templates` repo: [Go to repo](https://github.com/admin-bootcamps/python-templates)
+
+
+**`python-templates`** contains the sample Python files for Gen-AI activities.
 
 We use OpenRouter API for Text > Text and Huggingface API for Text > Image.
 
