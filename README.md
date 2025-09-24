@@ -1,6 +1,6 @@
 # README: Gen-AI with Python
 
-This is the README.md file for the `pythom-templates` repo: [Go to repo](https://github.com/admin-bootcamps/python-templates)
+This is the README.md file for the `python-templates` repo: [Go to repo](https://github.com/admin-bootcamps/python-templates)
 
 **`python-templates`** contains the sample Python files for Gen-AI activities.
 
@@ -43,7 +43,7 @@ HEADERS = {
 
 #### Data
 
-Then, buid the Data object you will send. This can have just an image prompt, or more parameters. You can find the other parameters in the model list (info below).
+Then, build the Data object you will send. This can have just an image prompt, or more parameters. You can find the other parameters in the model list (info below).
 
 This is what you send in the request.
 
