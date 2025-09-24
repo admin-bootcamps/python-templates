@@ -6,65 +6,32 @@ We use OpenRouter API for Text > Text and Huggingface API for Text > Image.
 
 An API is a way to ask the provider for the model's response without having to download and run a model to your computer, or using a website Playground.
 
-## 1. Setup: Python in VSCode
+---
+Make sure you've sent up your virtual environment and you've got your API keys. Head to the Luanchpad docs for how to do this, and for more info on Python & APIs...
 
-### Create a Virtual Environment
-
-1. In a new window, click 'Open Folder' and open your python_files folder. If a pop up comes up, click 'Yes, I trust the Authors'.
-
-2. Press Ctrl+Shift+P and start typing 'Python: Create Environment' until the option appears.
-
-3. Click 'Venv'.
-
-4. Choose the latest version of Python you have installed.
-5. Wait until your environment is created. You'll see a folder called '.venv' appear.
-
-6. If you don't see the folders in the siderbar, press Ctrl+B to show/hide the folders list.
-
-7. When this process is finished, a pop up in the bottom-right corner will say 'The following environment is selected: d:\python_files\.venv\......'
-
-8. Press Ctrl+` to show the Terminal.
-
-9. Click the expand arrow next to the '+' and open a Command Prompt window.
-10. You should see your current file location with (.venv) before it. This confirms your virtual environment is set up and active.
-
-### Install Requirements with pip
-
-Type `pip --version` and press Enter to make sure you have pip installed.
-You should get something like this:
-
-```bash
-> pip 25.x.x from d:\python_files\.venv\Lib\site-packages\pip (python 3.x)
-```
-
-Install the libraries.
-
-```bash
-pip install -r requirements.txt
-```
-
-The last two lines of the output should be something like this:
-
-```bash
-> Installing collected packages: urllib3, pillow, idna, charset-normalizer, certifi, requests
-> Successfully installed certifi charset-normalizer idna pillow requests urllib3
-```
-
-Now, you'll be able to run your python file!
-Open your python file from the sidebar, and make sure you've entered your TEXT_KEY or IMAGE_KEY.
-Clik the 'Run' button in the top-right corner.
-A new Python terminal will open and show you the output.
-To stop an execution, click anywhere inside the Python terminal and press Ctrl+C.
+[Scratch and Python with Gen-AI](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/instructions/programming_instructions.html)
 
 ---
 
-## 2. IMAGE GENERATION
+Here's some info on how to interact with the APIs we use. 
 
-### 2.1 HUGGINGFACE API DOCUMENTATION
 
+
+## Image Generation with Huggingface & fal.ai
+
+We generate images using the Huggingface API, but we only use models from the fal.ai provider.
+
+### Huggingface API Docs
+
+More info on how to use the Huggingface API can be found here: 
 [HuggingFace API Documentation](https://huggingface.co/docs/inference-providers/tasks/text-to-image#:~:text=API%20specification)
 
-#### CONSTANTS
+
+### Generate an Image with Python 
+
+#### Constants
+
+First, set the parameters that won't change.
 
 ```python
 IMAGE_KEY = "hf_thisIsYourImageKey"
@@ -75,9 +42,9 @@ HEADERS = {
 }
 ```
 
-### 2.2 IMAGE TEMPLATE
-
 #### Data
+
+Then, buid the Data object you will send. This can have just an image prompt, or more parameters. You can find the other parameters in the model list (info below).
 
 This is what you send in the request.
 
@@ -88,6 +55,8 @@ This is what you send in the request.
 ```
 
 #### Response
+
+When you use the `requests.post()` function with the above, you'll get the response.
 
 This is what you'll get back from the API.
 
@@ -105,7 +74,7 @@ This is what you'll get back from the API.
 }
 ```
 
-### 2.3 IMAGE EXAMPLE
+### Image example
 
 ```python
 IMAGE_KEY = "hf_thisIsYourImageKey"
@@ -154,9 +123,9 @@ Note that image urls are not valid forever, so you should save images you want t
 
 ---
 
-### 2.4 IMAGE MODELS
+### Image models
 
-[Fal-AI Model information](https://fal.ai/api/models?categories=text-to-image)
+The models you can use are listed in the playground. View the 'Model ID' using the Model Info toggle.
 
 API URL for specific model image generation:
 
@@ -167,10 +136,12 @@ API_URL = f"https://router.huggingface.co/fal-ai/{id}"
 For example:
 
 ```python
-API_URL = "https://router.huggingface.co/fal-ai/fal-ai/imagen4/preview"
+API_URL = "https://router.huggingface.co/fal-ai/fal-ai/sana/sprint"
 ```
 
-Here is the list of models we will use: [Fal Image Models](https://admin-bootcamps.github.io/playgrounds/fal_models.json)
+Here is the list of models we will use: [Fal Image Models](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/playgrounds/fal_models.json)
+
+An example of the 'model info':
 
 ```json
 {
@@ -211,15 +182,19 @@ Here is the list of models we will use: [Fal Image Models](https://admin-bootcam
 
 ---
 
-## 3. TEXT GENERATION
+## Text Generation with OpenRouter
 
-### 3.1 OPENROUTER API DOCUMENATION
+### More OpenRouter API Info can be found here:
 
 [OpenRouter Chat API Documentation](https://openrouter.ai/docs/api-reference/chat-completion)
 
 [OpenRouter Single-Message API Documentation](https://openrouter.ai/docs/api-reference/completion)
 
-#### CONSTANTS
+## Generate a 'Completion' with OpenRouter in Python
+
+There are two types of 'COmpletion' - a text completion of a chat completion. Chat completions mean you can build a list of messages which means the model can use previous messages to 'remember'. We generally use this one. But, if you only need one response and no back-and-forth, it's often easier to use the Text Completion (i.e. with no long chat arrays.)
+
+### Constants - both completion types
 
 ```python
 TEXT_KEY = "sk-or-v1-thisIsYourTextKey"
@@ -231,15 +206,13 @@ HEADERS = {
 
 ---
 
-### 3.2 Chat Completion (input multiple previous messages)
+### Data: Chat Completion (input multiple previous messages)
 
 ```python
 URL = "https://openrouter.ai/api/v1/chat/completions"
 ```
 
-#### CHAT TEMPLATE
-
-##### Data
+#### Template for Chat Completion
 
 This is what you send in the request.
 
@@ -259,7 +232,7 @@ This is what you send in the request.
 }
 ```
 
-##### Response
+#### Response from Chat Completion
 
 This is what you'll get back from the API.
 
@@ -277,7 +250,7 @@ This is what you'll get back from the API.
 }
 ```
 
-#### CHAT EXAMPLE
+#### Example of Chat Completion
 
 ```python
 TEXT_KEY = "sk-or-v1-thisIsYourTextKey"
@@ -355,7 +328,7 @@ I can only talk about parrots! What be yer favorite type of parrot, matey?
 
 ---
 
-### 3.3 COMPLETION (input ONE previous message)
+### Text completion (input ONE previous message)
 
 OpenRouter Single Message API URL:
 
@@ -363,9 +336,8 @@ OpenRouter Single Message API URL:
 API_URL = "https://openrouter.ai/api/v1/completions"
 ```
 
-#### COMPLETION TEMPLATE
+#### Completion Template
 
-##### Data
 
 This is what you send in the request.
 
@@ -385,7 +357,7 @@ optional:
 "frequency_penalty": [-2,2]
 ```
 
-#### Response
+#### Completion Response
 
 This is what you'll get back from the API.
 
@@ -402,7 +374,7 @@ This is what you'll get back from the API.
 }
 ```
 
-#### COMPLETION EXAMPLE
+#### Example of single-message completion
 
 ```python
 TEXT_KEY = "sk-or-v1-thisIsYourTextKey"
@@ -468,13 +440,15 @@ And here's what your `MESSAGE` should look like:
 Why are frogs so good at basketball?\n\nBecause they always jump to conclusions!
 ```
 
-### 3.4 TEXT MODELS
+### OpenRouter Text Models
 
 Open the below link in your browser to view all the models.
 
-[OpenRouter Models List](https://openrouter.ai/api/v1/models)
+[OpenRouter's Models List](https://openrouter.ai/api/v1/models)
 
-The models we recommend can be found here: [OpenRouter Models](https://admin-bootcamps.github.io/playgrounds/openrouter_models.json)
+At the bootcamp, you won't have access to all of these models. The models you can use can be found here: [OpenRouter Models for Bootcamp](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/playgrounds/openrouter_models.json)
+
+Here's an example of the model info.
 
 ```json
 {

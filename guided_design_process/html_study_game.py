@@ -4,8 +4,8 @@ import requests
 # -------------------------------
 # Set up the API and constants
 # -------------------------------
-API_KEY = "sk-or-v1-yourApiKey"
-MODEL_NAME = "gpt-5-mini"
+API_KEY = "sk-or-v1-yourApiKeyHere"
+MODEL_NAME = "qwen/qwen3-coder"
 
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 HEADERS = {
@@ -70,7 +70,7 @@ while True:
     # Display message
     filename=topic.replace(" ","_")
     print(f"\nAI has generated the HTML game! Saving to '{filename}_learning_game.html'...")
-    with open(f"guided_design_process/html_learning_game/generated_html/{filename}_learning_game.html", "w", encoding="utf-8") as file:
+    with open(f"guided_design_process/generated_html/{filename}_learning_game.html", "w", encoding="utf-8") as file:
         file.write(assistant_reply)
         
     
