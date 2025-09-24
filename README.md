@@ -2,7 +2,6 @@
 
 This is the README.md file for the `pythom-templates` repo: [Go to repo](https://github.com/admin-bootcamps/python-templates)
 
-
 **`python-templates`** contains the sample Python files for Gen-AI activities.
 
 We use OpenRouter API for Text > Text and Huggingface API for Text > Image.
@@ -16,9 +15,7 @@ Make sure you've sent up your virtual environment and you've got your API keys. 
 
 ---
 
-Here's some info on how to interact with the APIs we use. 
-
-
+Here's some info on how to interact with the APIs we use.
 
 ## Image Generation with Huggingface & fal.ai
 
@@ -26,11 +23,10 @@ We generate images using the Huggingface API, but we only use models from the fa
 
 ### Huggingface API Docs
 
-More info on how to use the Huggingface API can be found here: 
+More info on how to use the Huggingface API can be found here:
 [HuggingFace API Documentation](https://huggingface.co/docs/inference-providers/tasks/text-to-image#:~:text=API%20specification)
 
-
-### Generate an Image with Python 
+### Generate an Image with Python
 
 #### Constants
 
@@ -187,7 +183,7 @@ An example of the 'model info':
 
 ## Text Generation with OpenRouter
 
-### More OpenRouter API Info can be found here:
+More OpenRouter API Info can be found here:
 
 [OpenRouter Chat API Documentation](https://openrouter.ai/docs/api-reference/chat-completion)
 
@@ -340,7 +336,6 @@ API_URL = "https://openrouter.ai/api/v1/completions"
 ```
 
 #### Completion Template
-
 
 This is what you send in the request.
 
