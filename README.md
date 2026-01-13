@@ -1,21 +1,24 @@
 # README: Gen-AI with Python
 
-This is the README.md file for the `python-templates` repo: [Go to repo](https://github.com/admin-bootcamps/python-templates)
+This is the README.md file for the `python-templates` [GitHub Repository](https://github.com/admin-bootcamps/python-templates).
 
-**`python-templates`** contains the sample Python files for Gen-AI activities.
+**`python-templates`** contains the sample Python files for Gen-AI activities. To download the files, [go to the GitHub Repo](https://github.com/admin-bootcamps/python-templates), click the green "<> Code" button, and choose 'Download ZIP' (or any option if you are familiar with GitHub).
+
+Once downloaded, extract the file and set up your Python workspace on your computer.
+
+Make sure you've sent up your virtual environment and you've got your API keys. Head to the Launchpad docs for how to do this, and for more info on Python & APIs...
+
+[Scratch and Python with Gen-AI](https://admin-bootcamps.github.io/launchpad/instructions/programming_instructions)
+
+---
 
 We use OpenRouter API for Text > Text and Huggingface API for Text > Image.
 
-An API is a way to ask the provider for the model's response without having to download and run a model to your computer, or using a website Playground.
-
----
-Make sure you've sent up your virtual environment and you've got your API keys. Head to the Luanchpad docs for how to do this, and for more info on Python & APIs...
-
-[Scratch and Python with Gen-AI](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/instructions/programming_instructions.html)
-
----
+An API is a way to ask the provider for the model's response without having to download and run a model to your computer, or using a third-party website's Playground.
 
 Here's some info on how to interact with the APIs we use.
+
+---
 
 ## Image Generation with Huggingface & fal.ai
 
@@ -138,7 +141,7 @@ For example:
 API_URL = "https://router.huggingface.co/fal-ai/fal-ai/sana/sprint"
 ```
 
-Here is the list of models we will use: [Fal Image Models](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/playgrounds/playground_files/fal_models.json)
+Here is the list of models we will use: [Fal Image Models](https://admin-bootcamps.github.io/launchpad/playgrounds/playground_files/fal_models.json)
 
 An example of the 'model info':
 
@@ -444,7 +447,7 @@ Open the below link in your browser to view all the models.
 
 [OpenRouter's Models List](https://openrouter.ai/api/v1/models)
 
-At the bootcamp, you won't have access to all of these models. The models you can use can be found here: [OpenRouter Models for Bootcamp](https://admin-bootcamps.github.io/bootcamp-mandurah-2025/playgrounds/playground_files/openrouter_models.json)
+At the bootcamp, you won't have access to all of these models. The models you can use can be found here: [OpenRouter Models for Bootcamp](https://admin-bootcamps.github.io/launchpad/playgrounds/playground_files/openrouter_models.json)
 
 Here's an example of the model info.
 
