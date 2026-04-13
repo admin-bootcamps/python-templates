@@ -12,7 +12,7 @@ import subprocess
 import sys
 import venv
 
-VENV_DIR = "venv"
+VENV_DIR = ".venv"
 
 
 def venv_exists():
