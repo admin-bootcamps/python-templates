@@ -15,7 +15,14 @@ import venv
 VENV_DIR = "venv"
 
 
+def venv_exists():
+    return os.path.isfile(os.path.join(VENV_DIR, "pyvenv.cfg"))
+
+
 def create_venv():
+    if venv_exists():
+        print(f"Virtual environment already exists in '{VENV_DIR}', skipping creation.")
+        return
     print(f"Creating virtual environment in '{VENV_DIR}'...")
     venv.create(VENV_DIR, with_pip=True)
     print("Virtual environment created.")
