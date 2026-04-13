@@ -13,7 +13,7 @@ import os
 
 IMAGE_API_KEY = "hf_yourImageKeyHere"
 
-IMAGE_MODEL = "fal-ai/hidream-i1-fast"
+IMAGE_MODEL = "fal-ai/flux-1/dev"
 IMAGE_API_URL = f"https://router.huggingface.co/fal-ai/{IMAGE_MODEL}"
 IMAGE_HEADERS = {
     "Content-Type": "application/json",

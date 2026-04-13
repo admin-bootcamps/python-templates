@@ -8,7 +8,7 @@ from io import BytesIO
 
 API_KEY = "hf_apiKeyHere"
 
-MODEL = "fal-ai/hidream-i1-fast"
+MODEL = "fal-ai/flux-1/dev"
 API_URL = f"https://router.huggingface.co/fal-ai/{MODEL}"
 HEADERS = {
     "Content-Type": "application/json",

@@ -86,7 +86,7 @@ HEADERS = {
 }
 
 PROMPT = "An astronaut riding a horse on Mars"
-MODEL = "fal-ai/hidream-i1-fast"
+MODEL = "fal-ai/flux-1/dev"
 API_URL = f"https://router.huggingface.co/fal-ai/{MODEL_NAME}"
 
 EXAMPLE_DATA = {

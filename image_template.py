@@ -7,10 +7,10 @@ from io import BytesIO
 
 # Set up the API and constants...
 # Enter your API Key
-API_KEY = "hf_apiKeyHere"
+API_KEY = "hf_pasteYourImageKey"
 
 # Set your model
-MODEL = "fal-ai/hidream-i1-fast"
+MODEL = "fal-ai/flux-1/dev"
 
 # Define the API info
 API_URL = f"https://router.huggingface.co/fal-ai/{MODEL}"
