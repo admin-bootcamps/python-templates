@@ -48,12 +48,15 @@ def print_activation_instructions():
     print()
     print("Setup complete! To activate the virtual environment, run:")
     if sys.platform == "win32":
+        cmd_activate = os.path.join(VENV_DIR, "Scripts", "activate")
+        powershell_activate = os.path.join(".", VENV_DIR, "Scripts", "Activate.ps1")
         print("  In Command Prompt (cmd.exe):")
-        print(r"    venv\Scripts\activate")
+        print(f"    {cmd_activate}")
         print("  In PowerShell:")
-        print(r"    .\venv\Scripts\Activate.ps1")
+        print(f"    {powershell_activate}")
     else:
-        print("    source venv/bin/activate")
+        activate_path = os.path.join(VENV_DIR, "bin", "activate")
+        print(f"    source {activate_path}")
 
 
 if __name__ == "__main__":
