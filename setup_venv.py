@@ -41,7 +41,10 @@ def print_activation_instructions():
     print()
     print("Setup complete! To activate the virtual environment, run:")
     if sys.platform == "win32":
+        print("  In Command Prompt (cmd.exe):")
         print(r"    venv\Scripts\activate")
+        print("  In PowerShell:")
+        print(r"    .\venv\Scripts\Activate.ps1")
     else:
         print("    source venv/bin/activate")
 
