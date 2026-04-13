@@ -1,0 +1,55 @@
+"""
+Sets up a Python virtual environment and installs dependencies.
+Run this script from the project root folder:
+
+    python setup_venv.py
+
+Only requires Python (no other tools needed).
+"""
+
+import os
+import subprocess
+import sys
+import venv
+
+VENV_DIR = "venv"
+
+
+def create_venv():
+    print(f"Creating virtual environment in '{VENV_DIR}'...")
+    venv.create(VENV_DIR, with_pip=True)
+    print("Virtual environment created.")
+
+
+def get_pip_path():
+    if sys.platform == "win32":
+        return os.path.join(VENV_DIR, "Scripts", "pip.exe")
+    return os.path.join(VENV_DIR, "bin", "pip")
+
+
+def install_requirements():
+    pip = get_pip_path()
+    if not os.path.exists("requirements.txt"):
+        print("No requirements.txt found, skipping package install.")
+        return
+    print("Installing packages from requirements.txt...")
+    subprocess.check_call([pip, "install", "-r", "requirements.txt"])
+    print("Packages installed.")
+
+
+def print_activation_instructions():
+    print()
+    print("Setup complete! To activate the virtual environment, run:")
+    if sys.platform == "win32":
+        print("  In Command Prompt (cmd.exe):")
+        print(r"    venv\Scripts\activate")
+        print("  In PowerShell:")
+        print(r"    .\venv\Scripts\Activate.ps1")
+    else:
+        print("    source venv/bin/activate")
+
+
+if __name__ == "__main__":
+    create_venv()
+    install_requirements()
+    print_activation_instructions()
