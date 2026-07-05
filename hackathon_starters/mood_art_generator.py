@@ -8,7 +8,7 @@ from io import BytesIO
 
 API_KEY = "hf_apiKeyHere"
 
-MODEL = "fal-ai/flux-1/dev"
+MODEL = "fal-ai/sana/sprint"
 API_URL = f"https://router.huggingface.co/fal-ai/{MODEL}"
 HEADERS = {
     "Content-Type": "application/json",
